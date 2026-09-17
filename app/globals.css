@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+/* Tokens de la charte : aucune autre couleur autorisée. */
+@theme {
+  --color-page: #F4F1FA;
+  --color-surface: #FFFFFF;
+  --color-line: #E2DCF0;
+  --color-ink: #201736;
+  --color-ink-2: #66607F;
+  --color-violet: #5A2FC2;
+  --color-violet-dark: #3A1F8C;
+  --color-violet-veil: #EDE7FC;
+  --color-violet-line: #CDBDF4;
+  --color-gold: #F0B93B;
+  --color-gold-ink: #B07607;
+  --color-gold-veil: #FFF8E8;
+  --color-gold-line: #F7E3B6;
+  --color-ok: #1E7D4F;
+  --color-ko: #C0392B;
+  --color-ko-veil: #FBEAE7;
+
+  --font-display: "Archivo", system-ui, sans-serif;
+  --font-sans: "Instrument Sans", system-ui, sans-serif;
+
+  --radius-sm: 12px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 22px;
+
+  --animate-prime-in: primeIn 0.5s ease both;
+  --animate-row-in: rowIn 0.4s ease both;
+  --animate-twinkle: twinkle 1.4s ease-in-out infinite;
+  --animate-pop: pop 0.32s ease both;
+  --animate-float-star: floatStar 8s ease-in-out infinite;
+  --animate-sweep: sweep 5.5s linear infinite;
+  --animate-pulse-gold: pulseGold 2s ease-in-out infinite;
+  --animate-spin-slow: spinSlow 6s linear infinite;
+
+  @keyframes primeIn {
+    from { opacity: 0; transform: translateY(14px) scale(0.96); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes rowIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.25; transform: scale(0.85); }
+    50% { opacity: 1; transform: scale(1.15); }
+  }
+  @keyframes pop {
+    0% { opacity: 0; transform: scale(0.88); }
+    60% { transform: scale(1.03); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes floatStar {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(8px) rotate(14deg); }
+  }
+  @keyframes sweep {
+    0% { transform: translateX(-120%); }
+    100% { transform: translateX(320%); }
+  }
+  @keyframes pulseGold {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(240, 185, 59, 0); }
+    50% { box-shadow: 0 0 0 6px rgba(240, 185, 59, 0.28); }
+  }
+  @keyframes spinSlow {
+    from { transform: rotate(0); }
+    to { transform: rotate(360deg); }
+  }
+}
+
+@layer base {
+  html { -webkit-font-smoothing: antialiased; }
+  body { @apply bg-page text-ink font-sans; }
+  button, input, textarea, select { font-family: inherit; }
+  a { @apply text-violet; }
+  a:hover { @apply text-violet-dark; }
+  :focus-visible { outline: 3px solid var(--color-gold); outline-offset: 2px; border-radius: 6px; }
+}
+
+@utility card { @apply bg-surface border border-line rounded-lg; }
+@utility card-title { @apply font-display font-bold text-[17px] m-0; }
+@utility btn { @apply inline-flex items-center justify-center gap-2 min-h-11 px-4 rounded-sm text-[15px] font-semibold cursor-pointer transition-[background,transform,color] duration-150 disabled:cursor-default; }
+@utility btn-primary { @apply btn bg-violet text-white border-0 hover:bg-violet-dark; }
+@utility btn-secondary { @apply btn bg-surface text-violet border border-line hover:bg-violet-veil; }
+@utility btn-muted { @apply btn bg-surface text-ink-2 border border-line hover:bg-page; }
+@utility btn-gold { @apply btn bg-gold text-ink border-0 font-display font-extrabold hover:bg-[#FFD277] hover:-translate-y-0.5; }
+@utility btn-danger { @apply btn bg-ko text-white border-0 font-display font-extrabold; }
+@utility badge { @apply inline-flex items-center text-[11px] font-semibold rounded-full px-2 py-[3px] whitespace-nowrap; }
+@utility badge-violet { @apply badge bg-violet-veil text-violet-dark; }
+@utility badge-gold { @apply badge bg-gold-veil text-gold-ink; }
+@utility badge-ko { @apply badge bg-ko-veil text-ko; }
+@utility badge-ok { @apply badge bg-[#E4F3EA] text-ok; }
+@utility field { @apply w-full min-h-11 border border-line rounded-sm px-3 text-[15px] bg-page text-ink; }
+@utility label { @apply block text-xs font-semibold text-ink-2 mb-1.5; }
+@utility sr-only-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+@utility eyebrow { @apply text-xs font-bold tracking-[0.08em] uppercase; }
