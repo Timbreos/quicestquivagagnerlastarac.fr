@@ -9,7 +9,7 @@ Référence fonctionnelle : la spec v1 du 17 septembre 2026 et le prototype Clau
 
 - **Front** : Next.js 15 (App Router, TypeScript), export statique (`output: 'export'`), Tailwind 4.
 - **Base, auth, temps réel, stockage** : Supabase. Auth par magic link, entrée par code d'invitation.
-- **GIF** : API Tenor (clé publique, restreinte au domaine dans la console Google).
+- **GIF** : API Giphy (clé publique de type Web SDK, restreinte au domaine dans le tableau de bord Giphy).
 - **Hébergement** : GitHub Pages via GitHub Actions, domaine `quicestquivagagnerlastarac.fr` (fichier `public/CNAME`).
 
 Aucun secret dans le bundle : tout passe par le client Supabase navigateur et les policies RLS.
@@ -22,7 +22,7 @@ app/
   (app)/page.tsx                    accueil : bandeau d'état, classement, dernier prime, chat
   (app)/vote, votes, points, regles, eleves (?id=), prime, moi, admin
 components/  ui/, shell/, home/, chat/, vote/, prime/, admin/
-lib/         supabase/client.ts, types.ts, season.tsx (store + realtime), derive.ts, scoring.ts, tenor.ts, image.ts, format.ts
+lib/         supabase/client.ts, types.ts, season.tsx (store + realtime), derive.ts, scoring.ts, giphy.ts, image.ts, format.ts
 supabase/    migrations/, seed.sql, tests/ (rejeu du scoring sur Postgres), config.toml
 ```
 
@@ -41,7 +41,7 @@ changement de barème recalculent tout instantanément. Le front n'affiche que c
 
 ```bash
 npm install
-cp .env.example .env.local        # renseigner NEXT_PUBLIC_SUPABASE_URL / ANON_KEY / TENOR_KEY
+cp .env.example .env.local        # renseigner NEXT_PUBLIC_SUPABASE_URL / ANON_KEY / GIPHY_KEY
 npm run dev
 ```
 
@@ -92,7 +92,7 @@ Les codes suivants se créent depuis le back-office.
 
 Push sur `main` → GitHub Actions construit l'export statique avec les variables publiques injectées
 depuis les secrets du dépôt (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
-`NEXT_PUBLIC_TENOR_KEY`) et publie `out/` sur GitHub Pages. Activer Pages en mode « GitHub Actions »
+`NEXT_PUBLIC_GIPHY_KEY`) et publie `out/` sur GitHub Pages. Activer Pages en mode « GitHub Actions »
 dans les réglages du dépôt, et pointer le DNS du domaine vers GitHub Pages.
 
 ## Sécurité

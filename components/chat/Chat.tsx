@@ -9,7 +9,7 @@ import { useSeason } from "@/lib/season";
 import { supabase } from "@/lib/supabase/client";
 import { compressImage } from "@/lib/image";
 import { chatTime } from "@/lib/format";
-import type { Gif } from "@/lib/tenor";
+import type { Gif } from "@/lib/giphy";
 import type { Message, MessageReaction } from "@/lib/types";
 
 const PAGE = 50;
@@ -377,7 +377,7 @@ export function Chat({ className = "" }: { className?: string }) {
         onClose={() => setGifOpen(false)}
         onPick={(g: Gif) => {
           setGifOpen(false);
-          void send({ gif_url: g.url, gif_provider: "tenor" });
+          void send({ gif_url: g.url, gif_provider: "giphy" });
         }}
       />
     </section>

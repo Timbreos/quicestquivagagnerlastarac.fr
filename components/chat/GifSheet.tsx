@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Modal } from "@/components/ui/Modal";
-import { searchGifs, tenorKey, type Gif } from "@/lib/tenor";
+import { searchGifs, giphyKey, type Gif } from "@/lib/giphy";
 
 export function GifSheet({ open, onClose, onPick }: { open: boolean; onClose: () => void; onPick: (g: Gif) => void }) {
   const [q, setQ] = useState("");
@@ -21,7 +21,7 @@ export function GifSheet({ open, onClose, onPick }: { open: boolean; onClose: ()
         setGifs(r.gifs);
         setNext(r.next);
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Erreur Tenor");
+        setError(e instanceof Error ? e.message : "Erreur Giphy");
       } finally {
         setBusy(false);
       }
@@ -44,8 +44,8 @@ export function GifSheet({ open, onClose, onPick }: { open: boolean; onClose: ()
   return (
     <Modal open={open} onClose={onClose} label="Choisir un GIF" align="bottom" maxWidth={560}>
       <h2 className="m-0 mb-2.5 font-display font-extrabold italic text-lg">Un GIF</h2>
-      {!tenorKey() ? (
-        <p className="m-0 text-sm text-ko">La clé Tenor (NEXT_PUBLIC_TENOR_KEY) n&apos;est pas configurée dans ce build.</p>
+      {!giphyKey() ? (
+        <p className="m-0 text-sm text-ko">La clé Giphy (NEXT_PUBLIC_GIPHY_KEY) n&apos;est pas configurée dans ce build.</p>
       ) : (
         <>
           <label htmlFor="gif-q" className="sr-only-label">
@@ -68,7 +68,7 @@ export function GifSheet({ open, onClose, onPick }: { open: boolean; onClose: ()
             ))}
           </div>
           <div className="flex justify-between items-center mt-3 gap-2">
-            <span className="text-[11px] text-ink-2">GIF via Tenor</span>
+            <span className="text-[11px] text-ink-2 font-semibold tracking-wide">Powered by GIPHY</span>
             {next ? (
               <button type="button" onClick={more} disabled={busy} className="btn-muted text-sm">
                 {busy ? "…" : "Plus de GIF"}
