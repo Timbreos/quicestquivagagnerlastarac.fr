@@ -4,12 +4,12 @@
 const MAX_SIDE = 1600;
 const QUALITY = 0.82;
 
-export async function compressImage(file: File): Promise<{ blob: Blob; ext: string; contentType: string }> {
+export async function compressImage(file: File, maxSide = MAX_SIDE): Promise<{ blob: Blob; ext: string; contentType: string }> {
   if (file.type === "image/gif") {
     return { blob: file, ext: "gif", contentType: "image/gif" };
   }
   const bitmap = await loadBitmap(file);
-  const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height));
+  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
   const w = Math.max(1, Math.round(bitmap.width * scale));
   const h = Math.max(1, Math.round(bitmap.height * scale));
   const canvas = document.createElement("canvas");

@@ -4,6 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Pastille } from "@/components/ui/Pastille";
+import { CastingGrid } from "@/components/home/CastingGrid";
 import { EmptyBox, Loading, PageTitle } from "@/components/ui/Feedback";
 import { useSeason } from "@/lib/season";
 import { supabase } from "@/lib/supabase/client";
@@ -17,7 +18,7 @@ function FicheEleve() {
   const params = useSearchParams();
   const id = params.get("id");
   const season = store.season;
-  const contestant = store.contestants.find((c) => c.id === id) ?? store.contestants[0] ?? null;
+  const contestant = id ? store.contestants.find((c) => c.id === id) ?? null : null;
   const [placements, setPlacements] = useState<RankingItemPublic[]>([]);
 
   useEffect(() => {
@@ -40,7 +41,13 @@ function FicheEleve() {
   const profiles = useMemo(() => new Map(store.profiles.map((p) => [p.id, p])), [store.profiles]);
 
   if (!season) return <Loading />;
-  if (!contestant) return <EmptyBox title="Aucun élève">La liste arrive avec l&apos;ouverture de la saison.</EmptyBox>;
+  if (!contestant) {
+    return (
+      <div className="p-4 pt-0">
+        <CastingGrid title="Tous les élèves" />
+      </div>
+    );
+  }
 
   const status = contestantStatus(contestant, store.eliminations, nominees);
   const badge =
@@ -195,13 +202,24 @@ function NoteField({ phase, contestantId, name }: { phase: 1 | 2; contestantId: 
   );
 }
 
+function ElevesHeader() {
+  const params = useSearchParams();
+  const isSheet = Boolean(params.get("id"));
+  return (
+    <div className="px-4 pt-4 pb-3.5">
+      <PageTitle
+        title={isSheet ? "Fiche élève" : "Les élèves"}
+        sub={isSheet ? "Statut, où chacun l'a placé, et ta note privée." : "Le casting de la saison, tel qu'il se dévoile. Tape un élève pour sa fiche."}
+      />
+    </div>
+  );
+}
+
 export default function ElevesPage() {
   return (
     <Suspense fallback={<Loading />}>
       <div>
-        <div className="px-4 pt-4">
-          <PageTitle title="Fiche élève" sub="Statut, où chacun l'a placé, et ta note privée." />
-        </div>
+        <ElevesHeader />
         <FicheEleve />
       </div>
     </Suspense>

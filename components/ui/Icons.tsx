@@ -75,6 +75,15 @@ export const IconAdmin = ({ size = 22, className }: P) => (
   </svg>
 );
 
+export const IconGroup = ({ size = 22, className }: P) => (
+  <svg {...base(size, className)}>
+    <circle cx="9" cy="8" r="3.2" />
+    <circle cx="17" cy="9" r="2.6" />
+    <path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6" />
+    <path d="M15.5 14.5c2.9 0 5.5 2 5.5 5.5" />
+  </svg>
+);
+
 export const IconMore = ({ size = 22, className }: P) => (
   <svg {...base(size, className)}>
     <rect x="4" y="4" width="6" height="6" rx="1.5" />

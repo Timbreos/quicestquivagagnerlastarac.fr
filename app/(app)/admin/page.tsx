@@ -27,11 +27,12 @@ export default function AdminPage() {
         {store.season ? <span className="badge-gold border border-gold px-3 py-1.5 text-xs">{store.season.name}</span> : null}
       </div>
       <div className="grid gap-4 items-start" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))" }}>
+        {store.season?.status === "preparation" ? <ContestantsPanel /> : null}
         <SeasonPanel />
         {store.season ? (
           <>
             <WeekPanel />
-            <ContestantsPanel />
+            {store.season.status !== "preparation" ? <ContestantsPanel /> : null}
             <InvitesPanel />
             <RulesPanel />
           </>

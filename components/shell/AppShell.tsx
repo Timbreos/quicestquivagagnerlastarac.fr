@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { Etoile, LogoMark } from "@/components/ui/Etoile";
-import { IconAdmin, IconClose, IconHome, IconMore, IconPoints, IconPrime, IconRanking, IconRules, IconUser, IconVotes } from "@/components/ui/Icons";
+import { IconAdmin, IconClose, IconGroup, IconHome, IconMore, IconPoints, IconPrime, IconRanking, IconRules, IconUser, IconVotes } from "@/components/ui/Icons";
 import { Pastille } from "@/components/ui/Pastille";
 import { Loading } from "@/components/ui/Feedback";
 import { PrimeOverlay } from "@/components/prime/PrimeOverlay";
@@ -17,18 +17,20 @@ type NavItem = { href: string; label: string; short: string; icon: (p: { size?: 
 const NAV: NavItem[] = [
   { href: "/", label: "Accueil", short: "Accueil", icon: IconHome },
   { href: "/vote/", label: "Mon classement", short: "Classement", icon: IconRanking },
+  { href: "/eleves/", label: "Les élèves", short: "Élèves", icon: IconGroup },
   { href: "/votes/", label: "Les votes", short: "Votes", icon: IconVotes },
   { href: "/points/", label: "Détail des points", short: "Points", icon: IconPoints },
   { href: "/regles/", label: "Règles", short: "Règles", icon: IconRules },
 ];
 const MORE: NavItem[] = [
+  { href: "/eleves/", label: "Les élèves", short: "Élèves", icon: IconGroup },
   { href: "/votes/", label: "Les votes", short: "Votes", icon: IconVotes },
   { href: "/prime/", label: "Les primes", short: "Primes", icon: IconPrime },
   { href: "/regles/", label: "Règles", short: "Règles", icon: IconRules },
   { href: "/moi/", label: "Mon profil", short: "Profil", icon: IconUser },
 ];
 const ADMIN: NavItem = { href: "/admin/", label: "Back-office", short: "Admin", icon: IconAdmin };
-const MOBILE_MAIN = [NAV[0], NAV[1], NAV[3]];
+const MOBILE_MAIN = [NAV[0], NAV[1], NAV[4]];
 
 function isActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/" || pathname === "";

@@ -3,6 +3,7 @@
 import { BandeauEtat } from "@/components/home/BandeauEtat";
 import { Leaderboard } from "@/components/home/Leaderboard";
 import { LastExit } from "@/components/home/LastExit";
+import { CastingGrid } from "@/components/home/CastingGrid";
 import { Chat } from "@/components/chat/Chat";
 import { ErrorBox, Loading } from "@/components/ui/Feedback";
 import { useSeason } from "@/lib/season";
@@ -25,6 +26,7 @@ export default function HomePage() {
       <div className="flex-[1_1_520px] min-w-0 flex flex-col gap-4 lg:h-full lg:overflow-y-auto lg:pr-1 [&>*]:shrink-0">
         {store.error ? <ErrorBox message={store.error} /> : null}
         <BandeauEtat />
+        {store.season.status === "preparation" || store.season.status === "vote_p1" ? <CastingGrid /> : null}
         <Leaderboard progress />
         <LastExit />
       </div>

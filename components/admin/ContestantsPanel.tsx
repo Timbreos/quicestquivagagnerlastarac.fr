@@ -16,6 +16,11 @@ export function ContestantsPanel() {
   const season = store.season;
   const { busy, error, run } = useAction();
   const [bulk, setBulk] = useState("");
+  const [quickName, setQuickName] = useState("");
+  const [quickFile, setQuickFile] = useState<File | null>(null);
+  const [quickPreview, setQuickPreview] = useState<string | null>(null);
+  const quickFileRef = useRef<HTMLInputElement>(null);
+  const quickNameRef = useRef<HTMLInputElement>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editBio, setEditBio] = useState("");
@@ -26,6 +31,47 @@ export function ContestantsPanel() {
 
   if (!season) return null;
   const sid = season.id;
+
+  function pickQuickFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0] ?? null;
+    e.target.value = "";
+    if (quickPreview) URL.revokeObjectURL(quickPreview);
+    setQuickFile(f);
+    setQuickPreview(f ? URL.createObjectURL(f) : null);
+  }
+
+  // Ajout rapide, devant la télé : un nom, une photo, un tap. L'élève apparaît
+  // en direct chez tous les joueurs ; la photo suit quelques secondes après.
+  async function addQuick(e: React.FormEvent) {
+    e.preventDefault();
+    const name = quickName.trim();
+    if (!name) return;
+    const file = quickFile;
+    await run(async () => {
+      const ins = await supabase()
+        .from("contestants")
+        .insert({ season_id: sid, full_name: name, display_order: store.contestants.length + 1 })
+        .select("id")
+        .single();
+      if (ins.error || !ins.data) return ins;
+      setQuickName("");
+      setQuickFile(null);
+      if (quickPreview) URL.revokeObjectURL(quickPreview);
+      setQuickPreview(null);
+      await store.refresh();
+      quickNameRef.current?.focus();
+      if (file) {
+        const { blob, ext, contentType } = await compressImage(file, 1200);
+        const path = `${sid}/${ins.data.id}-${Date.now()}.${ext}`;
+        const up = await supabase().storage.from("contestant-photos").upload(path, blob, { contentType });
+        if (up.error) return { error: up.error };
+        const { data } = supabase().storage.from("contestant-photos").getPublicUrl(path);
+        const r = await supabase().from("contestants").update({ photo_url: data.publicUrl }).eq("id", ins.data.id);
+        if (!r.error) await store.refresh();
+        return r;
+      }
+    });
+  }
 
   async function addBulk(e: React.FormEvent) {
     e.preventDefault();
@@ -86,7 +132,7 @@ export function ContestantsPanel() {
     e.target.value = "";
     if (!file || !cid) return;
     await run(async () => {
-      const { blob, ext, contentType } = await compressImage(file);
+      const { blob, ext, contentType } = await compressImage(file, 1200);
       const path = `${sid}/${cid}-${Date.now()}.${ext}`;
       const up = await supabase().storage.from("contestant-photos").upload(path, blob, { contentType });
       if (up.error) return { error: up.error };
@@ -100,6 +146,42 @@ export function ContestantsPanel() {
   return (
     <Panel title="Élèves" sub={locked ? "Le vote est ouvert : n'ajoute ni ne retire d'élève, les classements en dépendent. Noms, bios et photos restent modifiables." : "Un nom par ligne. Les photos viennent après, elles ne bloquent rien : la pastille d'initiales fait le travail."}>
       {error ? <ErrorBox message={error} /> : null}
+      {!locked ? (
+        <form onSubmit={addQuick} className="bg-violet-veil border border-violet-line rounded-sm p-3 flex flex-col gap-2">
+          <h3 className="m-0 text-sm font-semibold">Ajout rapide, en direct du prime</h3>
+          <div className="flex gap-2 items-center">
+            <button
+              type="button"
+              onClick={() => quickFileRef.current?.click()}
+              aria-label={quickFile ? "Changer la photo" : "Prendre une photo"}
+              className="w-14 h-14 shrink-0 rounded-full border-2 border-dashed border-violet-line bg-surface grid place-items-center overflow-hidden text-violet text-xs font-semibold"
+            >
+              {quickPreview ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={quickPreview} alt="" className="w-full h-full object-cover" />
+              ) : (
+                "Photo"
+              )}
+            </button>
+            <input ref={quickFileRef} type="file" accept="image/*" capture="environment" onChange={pickQuickFile} className="hidden" aria-label="Photo de l'élève" />
+            <label htmlFor="quick-name" className="sr-only-label">Nom de l&apos;élève</label>
+            <input
+              id="quick-name"
+              ref={quickNameRef}
+              value={quickName}
+              onChange={(e) => setQuickName(e.target.value)}
+              placeholder="Prénom Nom"
+              autoComplete="off"
+              enterKeyHint="done"
+              className="field flex-1 min-w-0 bg-surface"
+            />
+            <button type="submit" disabled={busy || !quickName.trim()} className="btn-primary shrink-0">
+              Ajouter
+            </button>
+          </div>
+          <p className="m-0 text-xs text-ink-2">L&apos;élève apparaît aussitôt chez tous les joueurs ; la photo suit après l&apos;envoi. Sans photo, la pastille d&apos;initiales prend le relais.</p>
+        </form>
+      ) : null}
       <ul className="list-none m-0 p-0 max-h-[420px] overflow-y-auto">
         {store.contestants.map((c, i) => {
           const st = contestantStatus(c, store.eliminations, nominees);
@@ -170,7 +252,7 @@ export function ContestantsPanel() {
       {!locked ? (
         <form onSubmit={addBulk} className="flex flex-col gap-2 pt-2 border-t border-page">
           <label htmlFor="bulk" className="label">
-            Ajouter des élèves (un par ligne)
+            Ajouter plusieurs élèves d&apos;un coup (un nom par ligne, photos ensuite)
           </label>
           <textarea id="bulk" rows={4} value={bulk} onChange={(e) => setBulk(e.target.value)} placeholder={"Léane Dubreuil\nMarius Ferrand"} className="field py-2 resize-y" />
           <button type="submit" disabled={busy || !bulk.trim()} className="btn-primary self-start text-sm">
