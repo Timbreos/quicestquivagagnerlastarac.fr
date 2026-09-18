@@ -82,6 +82,8 @@
   /* Safari iOS : les enfants animés (étoiles) ne doivent jamais élargir un conteneur qui défile. */
   .animate-float-star, .animate-twinkle, .animate-spin-slow { will-change: transform; }
   button, input, textarea, select { font-family: inherit; }
+  img, svg, video { max-width: 100%; }
+  input, textarea, select { min-width: 0; }
   a { @apply text-violet; }
   a:hover { @apply text-violet-dark; }
   :focus-visible { outline: 3px solid var(--color-gold); outline-offset: 2px; border-radius: 6px; }

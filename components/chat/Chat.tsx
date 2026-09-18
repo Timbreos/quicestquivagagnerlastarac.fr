@@ -353,7 +353,7 @@ export function Chat({ className = "" }: { className?: string }) {
               }
             }}
             placeholder="Écrire au groupe"
-            className="field flex-1 py-2.5 resize-none max-h-32 leading-[1.4]"
+            className="field flex-1 min-w-0 py-2.5 resize-none max-h-32 leading-[1.4]"
             style={{ minHeight: 44 }}
           />
           <button type="submit" disabled={busy !== null || !draft.trim()} className="btn-primary min-w-11 px-3.5 text-sm">

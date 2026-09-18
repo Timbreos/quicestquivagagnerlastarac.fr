@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { NoZoom } from "@/components/shell/NoZoom";
+import { LayoutDebug } from "@/components/shell/LayoutDebug";
 
 export const metadata: Metadata = {
   title: "Qui c'est qui va gagner la Starac",
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-dvh">
         <NoZoom />
+        <LayoutDebug />
         {children}
       </body>
     </html>
