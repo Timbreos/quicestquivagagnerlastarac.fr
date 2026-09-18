@@ -75,7 +75,7 @@
   html { -webkit-font-smoothing: antialiased; touch-action: pan-x pan-y; -webkit-text-size-adjust: 100%; }
   /* Pas de double-tap zoom sur les éléments interactifs (touch-action: manipulation). */
   button, a, input, select, textarea, label { touch-action: manipulation; }
-  body { @apply bg-page text-ink font-sans; }
+  body { @apply bg-page text-ink font-sans; overscroll-behavior-y: none; }
   button, input, textarea, select { font-family: inherit; }
   a { @apply text-violet; }
   a:hover { @apply text-violet-dark; }

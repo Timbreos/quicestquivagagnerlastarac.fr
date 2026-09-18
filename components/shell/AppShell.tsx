@@ -67,7 +67,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const moreActive = more.some((n) => isActive(pathname, n.href)) && !MOBILE_MAIN.some((n) => isActive(pathname, n.href));
 
   return (
-    <div className="min-h-dvh flex flex-col">
+    // Coque à hauteur fixe : la page ne défile pas, <main> défile. La barre basse
+    // reste un élément normal, jamais recouverte par la barre d'outils de Safari.
+    <div className="h-dvh flex flex-col overflow-hidden">
       <header className="bg-violet-dark text-white relative overflow-hidden shrink-0">
         <Etoile
           size={120}
@@ -139,7 +141,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="lg:hidden h-2.5" />
       </header>
 
-      <main className="flex-1 min-h-0 w-full max-w-[1480px] mx-auto pb-20 lg:pb-0">{children}</main>
+      <main className="flex-1 min-h-0 overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]">
+        <div className="w-full max-w-[1480px] mx-auto lg:h-full">{children}</div>
+      </main>
 
       {moreOpen ? (
         <div className="lg:hidden fixed inset-0 z-40" style={{ background: "rgba(32,23,54,.45)" }} onMouseDown={() => setMoreOpen(false)}>
@@ -147,8 +151,8 @@ export function AppShell({ children }: { children: ReactNode }) {
             role="dialog"
             aria-modal="true"
             aria-label="Plus d'écrans"
-            className="absolute inset-x-0 bottom-14 bg-surface rounded-t-xl border-t border-line p-3 animate-prime-in"
-            style={{ paddingBottom: "calc(12px + env(safe-area-inset-bottom))" }}
+            className="absolute inset-x-0 bg-surface rounded-t-xl border-t border-line p-3 animate-prime-in"
+            style={{ bottom: "calc(56px + env(safe-area-inset-bottom))", paddingBottom: 12 }}
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-1 pb-2">
@@ -182,7 +186,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <nav
         aria-label="Écrans"
-        className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-violet-dark border-t border-violet flex"
+        className="lg:hidden shrink-0 z-40 bg-violet-dark border-t border-violet flex"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         {MOBILE_MAIN.map((n) => {

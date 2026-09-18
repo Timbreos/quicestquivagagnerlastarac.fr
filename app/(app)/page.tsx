@@ -21,7 +21,7 @@ export default function HomePage() {
     );
   }
   return (
-    <div className="flex flex-wrap gap-4 items-start p-4 lg:h-[calc(100dvh-62px)]">
+    <div className="flex flex-wrap gap-4 items-start p-4 lg:h-full">
       <div className="flex-[1_1_520px] min-w-0 flex flex-col gap-4 lg:h-full lg:overflow-y-auto lg:pr-1 [&>*]:shrink-0">
         {store.error ? <ErrorBox message={store.error} /> : null}
         <BandeauEtat />

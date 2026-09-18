@@ -329,7 +329,7 @@ export function VoteScreen({ phase }: { phase: 1 | 2 }) {
         </section>
 
         {editable ? (
-          <div className="sticky bottom-14 lg:bottom-0 bg-page pt-3 pb-1 flex flex-wrap gap-2.5 items-center">
+          <div className="sticky bottom-0 bg-page pt-3 pb-2 flex flex-wrap gap-2.5 items-center">
             <button
               type="button"
               disabled={filled.length < N}
