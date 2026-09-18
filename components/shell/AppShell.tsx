@@ -67,9 +67,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const moreActive = more.some((n) => isActive(pathname, n.href)) && !MOBILE_MAIN.some((n) => isActive(pathname, n.href));
 
   return (
-    // Coque à hauteur fixe : la page ne défile pas, <main> défile. La barre basse
-    // reste un élément normal, jamais recouverte par la barre d'outils de Safari.
-    <div className="h-dvh flex flex-col overflow-hidden">
+    // Coque ancrée à la fenêtre visible : le document ne défile jamais, seul <main>
+    // défile. En-tête et barre basse restent en place quoi que fasse Safari.
+    <div className="fixed inset-0 flex flex-col overflow-hidden">
       <header className="bg-violet-dark text-white relative overflow-hidden shrink-0">
         <Etoile
           size={120}
