@@ -45,7 +45,7 @@ function InviteForm() {
 
   if (session === undefined) {
     return (
-      <div className="min-h-screen grid place-items-center">
+      <div className="min-h-dvh grid place-items-center">
         <Loading />
       </div>
     );

@@ -2,7 +2,7 @@ import { LogoMark } from "@/components/ui/Etoile";
 
 export function AuthCard({ children, title, sub }: { children: React.ReactNode; title: string; sub?: string }) {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-dvh flex items-center justify-center p-4">
       <div className="w-full max-w-[420px]">
         <div className="flex items-center gap-3 mb-5">
           <LogoMark size={44} bg="#3A1F8C" />
