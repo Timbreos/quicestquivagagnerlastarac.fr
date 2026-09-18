@@ -76,7 +76,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     // Coque ancrée à la fenêtre visible : le document ne défile jamais, seul <main>
     // défile. En-tête et barre basse restent en place quoi que fasse Safari.
-    <div className="fixed inset-0 flex flex-col overflow-hidden">
+    <div data-app-shell className="fixed top-0 left-0 w-full h-dvh flex flex-col overflow-hidden">
       <header className="bg-violet-dark text-white relative overflow-hidden shrink-0 [clip-path:inset(0)]">
         <Etoile
           size={120}

@@ -18,7 +18,8 @@ export function LayoutDebug() {
       const vv = window.visualViewport;
       const lines: string[] = [
         `page ${window.location.pathname}`,
-        `innerWidth ${w} · outerWidth ${window.outerWidth} · screen ${window.screen.width}`,
+        `innerWidth ${w} · innerHeight ${window.innerHeight} · screen ${window.screen.width}×${window.screen.height}`,
+        `html clientH ${document.documentElement.clientHeight} · coque ${Math.round(document.querySelector("[data-app-shell]")?.getBoundingClientRect().height ?? 0)}px de haut`,
         `visualViewport ${vv ? `${Math.round(vv.width)}×${Math.round(vv.height)} scale ${vv.scale.toFixed(2)} offset ${Math.round(vv.offsetLeft)},${Math.round(vv.offsetTop)}` : "n/a"}`,
         `html scrollW ${document.documentElement.scrollWidth} clientW ${document.documentElement.clientWidth} · body scrollW ${document.body.scrollWidth}`,
         `main scrollW ${document.querySelector("main")?.scrollWidth ?? "-"} clientW ${document.querySelector("main")?.clientWidth ?? "-"}`,
