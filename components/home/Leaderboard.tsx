@@ -32,14 +32,14 @@ export function Leaderboard({ progress = false, footer = true }: { progress?: bo
             return (
               <li
                 key={r.user_id}
-                className={`flex flex-wrap items-center gap-x-3 gap-y-1 px-2 py-2.5 border-t border-page rounded-sm animate-row-in ${isLeader ? "bg-gold-veil" : ""}`}
+                className={`flex flex-nowrap lg:flex-wrap items-center gap-x-2 sm:gap-x-3 gap-y-1 px-2 py-2.5 border-t border-page rounded-sm animate-row-in ${isLeader ? "bg-gold-veil" : ""}`}
                 style={{ animationDelay: `${k * 0.06}s` }}
               >
                 <span className={`w-6 shrink-0 font-display font-extrabold text-right ${isLeader ? "text-lg text-gold-ink" : "text-[15px] text-ink-2"}`}>
                   {rank ?? "—"}
                 </span>
                 <Pastille name={r.display_name} photo={r.avatar_url} size={30} tone={isLeader ? "gold" : isMe ? "violet" : "dark"} ring={isLeader} />
-                <span className="flex-1 min-w-[44px] text-[15px] font-medium whitespace-nowrap overflow-hidden text-ellipsis">{r.display_name}</span>
+                <span className="flex-1 min-w-[36px] text-[15px] font-medium whitespace-nowrap overflow-hidden text-ellipsis">{r.display_name}</span>
                 {isMe ? <span className="badge-violet">toi</span> : null}
                 {r.is_admin ? <span className="badge bg-page text-ink-2 hidden sm:inline-flex">orga</span> : null}
                 {!r.has_submitted ? <span className="badge-gold shrink-0">{pendingLabel}</span> : null}
