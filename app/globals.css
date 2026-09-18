@@ -72,7 +72,9 @@
 }
 
 @layer base {
-  html { -webkit-font-smoothing: antialiased; }
+  html { -webkit-font-smoothing: antialiased; touch-action: pan-x pan-y; -webkit-text-size-adjust: 100%; }
+  /* Pas de double-tap zoom sur les éléments interactifs (touch-action: manipulation). */
+  button, a, input, select, textarea, label { touch-action: manipulation; }
   body { @apply bg-page text-ink font-sans; }
   button, input, textarea, select { font-family: inherit; }
   a { @apply text-violet; }
@@ -93,7 +95,7 @@
 @utility badge-gold { @apply badge bg-gold-veil text-gold-ink; }
 @utility badge-ko { @apply badge bg-ko-veil text-ko; }
 @utility badge-ok { @apply badge bg-[#E4F3EA] text-ok; }
-@utility field { @apply w-full min-h-11 border border-line rounded-sm px-3 text-[15px] bg-page text-ink; }
+@utility field { @apply w-full min-h-11 border border-line rounded-sm px-3 text-base bg-page text-ink; }
 @utility label { @apply block text-xs font-semibold text-ink-2 mb-1.5; }
 @utility sr-only-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 @utility eyebrow { @apply text-xs font-bold tracking-[0.08em] uppercase; }

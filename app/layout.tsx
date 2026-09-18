@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { NoZoom } from "@/components/shell/NoZoom";
 
 export const metadata: Metadata = {
   title: "Qui c'est qui va gagner la Starac",
@@ -8,9 +9,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+// Pas de zoom : l'app se tient au doigt, comme une app native. Les tailles de
+// texte et les cibles de 44 px sont calibrées pour ne pas en avoir besoin.
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
   themeColor: "#3A1F8C",
 };
 
@@ -26,7 +32,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
-      <body className="min-h-screen">{children}</body>
+      <body className="min-h-screen">
+        <NoZoom />
+        {children}
+      </body>
     </html>
   );
 }
