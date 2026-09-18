@@ -25,6 +25,7 @@ export type Season = {
   p2_opens_at: string | null;
   p2_closes_at: string | null;
   p2_revealed_at: string | null;
+  roster_complete_at: string | null;
   phase2_threshold: number;
   created_at: string;
 };

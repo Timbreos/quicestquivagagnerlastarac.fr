@@ -22,7 +22,7 @@ export function CastingGrid({ title = "Le casting", compact = false }: { title?:
       <div className="flex items-baseline justify-between gap-2 mb-3">
         <h2 className="card-title">{title}</h2>
         <span className="text-xs text-ink-2">
-          {n === 0 ? "en attente" : `${n} élève${n > 1 ? "s" : ""} annoncé${n > 1 ? "s" : ""}`}
+          {n === 0 ? "en attente" : `${n} élève${n > 1 ? "s" : ""}${store.season?.roster_complete_at ? "" : " · liste en cours"}`}
         </span>
       </div>
       {n === 0 ? (

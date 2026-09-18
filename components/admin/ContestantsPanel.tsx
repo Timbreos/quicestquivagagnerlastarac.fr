@@ -27,7 +27,7 @@ export function ContestantsPanel() {
   const fileFor = useRef<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const nominees = nomineesOf(currentWeek(store.weeks), store.nominations);
-  const locked = Boolean(season?.p1_opens_at);
+  const locked = Boolean(season?.roster_complete_at);
 
   if (!season) return null;
   const sid = season.id;
@@ -144,7 +144,7 @@ export function ContestantsPanel() {
   }
 
   return (
-    <Panel title="Élèves" sub={locked ? "Le vote est ouvert : n'ajoute ni ne retire d'élève, les classements en dépendent. Noms, bios et photos restent modifiables." : "Un nom par ligne. Les photos viennent après, elles ne bloquent rien : la pastille d'initiales fait le travail."}>
+    <Panel title="Élèves" sub={locked ? "Liste déclarée complète : plus d'ajout ni de retrait (rouvre-la depuis le panneau Saison si besoin). Noms, bios et photos restent modifiables." : "Ajoute les élèves au fil du prime, même vote ouvert : ils tombent en direct dans la grille des joueurs. Quand la liste est finie, déclare-la complète dans le panneau Saison."}>
       {error ? <ErrorBox message={error} /> : null}
       {!locked ? (
         <form onSubmit={addQuick} className="bg-violet-veil border border-violet-line rounded-sm p-3 flex flex-col gap-2">

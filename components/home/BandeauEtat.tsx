@@ -32,6 +32,16 @@ export function BandeauEtat() {
   }
 
   if (p1Open && !myP1?.submitted_at) {
+    if (!season.roster_complete_at) {
+      const n = store.contestants.length;
+      return (
+        <Dark eyebrow={`Casting en cours · ${n} élève${n > 1 ? "s" : ""}`} title="Le casting se dévoile, commence à classer" cta={{ href: "/vote/", label: myP1 ? "Continuer mon classement" : "Commencer à classer" }}>
+          <p className="m-0 text-sm text-violet-line">
+            Les élèves arrivent en direct dans ta grille. Place-les au fil de l&apos;eau ; la validation s&apos;ouvrira quand la liste sera complète.
+          </p>
+        </Dark>
+      );
+    }
     return (
       <Dark
         eyebrow={firstPrime ? `Premier prime ${longDateTime(firstPrime)}` : "Phase 1 ouverte"}

@@ -42,6 +42,8 @@ begin
     insert into public.contestants (id, season_id, full_name, display_order) values (c_ids[k], s_id, names[k], k);
   end loop;
 
+  update public.seasons set roster_complete_at = '2026-10-05 23:00+02' where id = s_id;
+
   -- Classements de phase 1 (permutation déterministe, même graine que le prototype)
   for player in
     select * from (values (u_yanis, 7, true), (u_lea, 23, true), (u_marc, 41, true), (u_sofia, 58, true), (u_hugo, 91, false), (u_fanny, 12, true))

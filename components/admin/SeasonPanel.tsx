@@ -63,6 +63,33 @@ export function SeasonPanel() {
             </span>
           </div>
 
+          <div className="flex flex-wrap items-center gap-2.5 p-2.5 border border-line rounded-sm">
+            <span className="flex-1 min-w-[200px]">
+              <span className="block text-sm font-semibold">Liste des élèves</span>
+              <span className="block text-[13px] text-ink-2">
+                {season.roster_complete_at
+                  ? `Complète (${store.contestants.length} élèves), déclarée ${longDateTime(season.roster_complete_at)}. Les joueurs peuvent valider.`
+                  : `${store.contestants.length} élève${store.contestants.length > 1 ? "s" : ""} pour l'instant. Tant qu'elle n'est pas complète, les joueurs classent mais ne valident pas.`}
+              </span>
+            </span>
+            <span className={season.roster_complete_at ? "badge-ok" : "badge-gold"}>{season.roster_complete_at ? "complète" : "en cours"}</span>
+            {season.roster_complete_at ? (
+              hasRankings ? null : (
+                <button type="button" disabled={busy} onClick={() => patch({ roster_complete_at: null })} className="btn-muted text-sm">
+                  Rouvrir la liste
+                </button>
+              )
+            ) : (
+              <ConfirmButton
+                label="Déclarer la liste complète"
+                confirmLabel={`Confirmer : ${store.contestants.length} élèves, la validation s'ouvre`}
+                onConfirm={() => patch({ roster_complete_at: new Date().toISOString() })}
+                disabled={busy || store.contestants.length < 2}
+                className="btn-gold"
+              />
+            )}
+          </div>
+
           <PhaseRow
             title="Phase 1 — classement complet"
             opens={season.p1_opens_at}
@@ -70,7 +97,7 @@ export function SeasonPanel() {
             revealed={season.p1_revealed_at}
             busy={busy}
             canOpen={store.contestants.length >= 2}
-            openHint={store.contestants.length < 2 ? "Saisis d'abord les élèves." : "Ouvre le vote : les joueurs classent et commentent."}
+            openHint={store.contestants.length < 2 ? "Saisis d'abord au moins deux élèves." : "Ouvre le vote, même pendant le casting : les joueurs classent au fil de l'eau."}
             onOpen={() => patch({ p1_opens_at: new Date().toISOString(), p1_closes_at: null })}
             onClose={() => patch({ p1_closes_at: new Date().toISOString() })}
             onReopen={() => patch({ p1_closes_at: null })}

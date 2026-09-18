@@ -33,6 +33,7 @@ export function VoteScreen({ phase }: { phase: 1 | 2 }) {
   const opened = Boolean(phase === 1 ? season?.p1_opens_at : season?.p2_opens_at);
   const submitted = Boolean(ranking?.submitted_at);
   const editable = open && !submitted;
+  const rosterComplete = phase === 2 || Boolean(season?.roster_complete_at);
   const byId = useMemo(() => new Map(store.contestants.map((c) => [c.id, c])), [store.contestants]);
 
   const [slots, setSlots] = useState<Array<string | null>>(() => Array(N).fill(null));
@@ -208,10 +209,19 @@ export function VoteScreen({ phase }: { phase: 1 | 2 }) {
         {editable ? (
           <div className="flex flex-wrap items-center gap-2.5 justify-between bg-gold-veil border border-gold rounded-md px-3.5 py-2.5">
             <p className="m-0 text-[13px] text-gold-ink">
-              <span className="font-semibold">
-                {firstPrime && phase === 1 ? `Premier prime ${longDateTime(firstPrime)}.` : "Fermeture par l'organisateur avant le prime."}
-              </span>{" "}
-              Sans validation, {phase === 1 ? "tu es hors saison" : "tu ne marques pas les points de phase 2"}.
+              {rosterComplete ? (
+                <>
+                  <span className="font-semibold">
+                    {firstPrime && phase === 1 ? `Premier prime ${longDateTime(firstPrime)}.` : "Fermeture par l'organisateur avant le prime."}
+                  </span>{" "}
+                  Sans validation, {phase === 1 ? "tu es hors saison" : "tu ne marques pas les points de phase 2"}.
+                </>
+              ) : (
+                <>
+                  <span className="font-semibold">Le casting se dévoile encore ({N} élève{N > 1 ? "s" : ""} pour l&apos;instant).</span> Classe au fil de l&apos;eau, les nouveaux
+                  arrivent ici en direct. La validation s&apos;ouvrira quand la liste sera complète.
+                </>
+              )}
             </p>
             <span className={`text-xs font-semibold whitespace-nowrap ${saveState === "error" ? "text-ko" : saveState === "saving" ? "text-ink-2" : "text-ok"}`} role="status">
               {saveState === "saving" ? "Enregistrement…" : saveState === "error" ? "Erreur d'enregistrement" : "Brouillon enregistré"}
@@ -332,13 +342,17 @@ export function VoteScreen({ phase }: { phase: 1 | 2 }) {
           <div className="sticky bottom-0 bg-page pt-3 pb-2 flex flex-wrap gap-2.5 items-center">
             <button
               type="button"
-              disabled={filled.length < N}
+              disabled={filled.length < N || !rosterComplete}
               onClick={() => setConfirmOpen(true)}
               className={`flex-1 min-w-[200px] min-h-12 px-[18px] rounded-md text-white font-display font-extrabold text-base border-0 ${
-                filled.length < N ? "bg-violet-line cursor-default" : "bg-violet cursor-pointer animate-pulse-gold"
+                filled.length < N || !rosterComplete ? "bg-violet-line cursor-default" : "bg-violet cursor-pointer animate-pulse-gold"
               }`}
             >
-              {filled.length < N ? `Valider — ${N - filled.length} place${N - filled.length > 1 ? "s" : ""} à remplir` : "Valider mon classement"}
+              {!rosterComplete
+                ? "Valider — quand le casting sera complet"
+                : filled.length < N
+                  ? `Valider — ${N - filled.length} place${N - filled.length > 1 ? "s" : ""} à remplir`
+                  : "Valider mon classement"}
             </button>
             {confirmClear ? (
               <button type="button" onClick={clearAll} className="btn bg-ko-veil text-ko border border-[#E7B4AD] text-sm">

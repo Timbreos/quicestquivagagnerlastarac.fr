@@ -115,6 +115,13 @@ begin
   r3 := public.save_ranking_draft(sid, 1, jsonb_build_array(jsonb_build_object('contestant_id', cA, 'position', 1)));
   reset role;
 
+  -- Casting en cours : Uma a tout placé mais ne peut pas valider
+  perform pg_temp.assert_eq('liste incomplète : validation refusée',
+    pg_temp.denied_as(u2, format('update public.rankings set submitted_at = now() where id = %L', r2)), true);
+  update public.seasons set roster_complete_at = '2026-01-01 12:00' where id = sid;
+  perform pg_temp.assert_eq('liste complète : ajout d''élève refusé',
+    pg_temp.denied_as(u1, format('insert into public.contestants (season_id, full_name) values (%L, %L)', sid, 'G')), true);
+
   -- Avant révélation : Uma ne voit pas le classement d'Ulysse, ni ses items
   perform pg_temp.assert_eq('avant révélation, rankings des autres invisibles',
     pg_temp.count_as(u2, format('select 1 from public.rankings where user_id = %L', u1)), 0::bigint);
@@ -131,6 +138,8 @@ begin
   perform pg_temp.assert_eq('scellé : ranking intouchable (RLS filtre la ligne)',
     (select submitted_at is not null from public.rankings where id = r1), true);
 
+  perform pg_temp.assert_eq('classements scellés : liste non rouvrable',
+    pg_temp.denied_as(u1, format('update public.seasons set roster_complete_at = null where id = %L', sid)), true);
   update public.seasons set p1_closes_at = '2026-01-03', p1_revealed_at = '2026-01-03' where id = sid;
   perform pg_temp.assert_eq('statut p1_revelee', (select status from public.seasons where id = sid), 'p1_revelee');
   perform pg_temp.assert_eq('phase fermée : brouillon de Ugo figé',
