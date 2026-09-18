@@ -45,6 +45,13 @@ export function AppShell({ children }: { children: ReactNode }) {
     setMoreOpen(false);
   }, [pathname]);
 
+  // Verrouille le document tant que la coque est montée : iOS Safari ne peut
+  // plus faire glisser la page, ni en hauteur ni en largeur.
+  useEffect(() => {
+    document.documentElement.classList.add("app-shell-lock");
+    return () => document.documentElement.classList.remove("app-shell-lock");
+  }, []);
+
   useEffect(() => {
     if (!store.ready) return;
     if (!store.session) router.replace("/login/");
@@ -70,7 +77,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     // Coque ancrée à la fenêtre visible : le document ne défile jamais, seul <main>
     // défile. En-tête et barre basse restent en place quoi que fasse Safari.
     <div className="fixed inset-0 flex flex-col overflow-hidden">
-      <header className="bg-violet-dark text-white relative overflow-hidden shrink-0">
+      <header className="bg-violet-dark text-white relative overflow-hidden shrink-0 [clip-path:inset(0)]">
         <Etoile
           size={120}
           className="absolute -top-[34px] -right-[14px] opacity-[.13] animate-float-star"
@@ -79,7 +86,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="relative max-w-[1480px] mx-auto px-4 pt-3.5 lg:pb-3.5 flex items-center justify-between gap-3">
           <Link href="/" className="flex items-center gap-2.5 min-w-0 text-white hover:text-white no-underline">
             <LogoMark />
-            <span className="min-w-0 font-display font-extrabold italic text-[15px] sm:text-base leading-[1.05] tracking-[-0.025em]">
+            <span className="flex flex-col min-w-0 font-display font-extrabold italic text-[15px] sm:text-base leading-[1.05] tracking-[-0.025em]">
               <span className="block whitespace-nowrap overflow-hidden text-ellipsis">qui c&apos;est qui va gagner</span>
               <span className="block whitespace-nowrap overflow-hidden text-ellipsis">
                 la <span className="text-gold">starac</span>

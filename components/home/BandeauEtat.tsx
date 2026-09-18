@@ -149,7 +149,7 @@ function Dark({
   children?: React.ReactNode;
 }) {
   return (
-    <section className="relative overflow-hidden bg-violet-dark border border-violet-dark rounded-lg p-4 text-white">
+    <section className="relative overflow-hidden bg-violet-dark border border-violet-dark rounded-lg p-4 text-white [clip-path:inset(0_round_18px)]">
       <Etoile size={130} className="absolute -top-[30px] -right-6 opacity-[.16] animate-float-star" />
       <div className="relative">
         <p className="m-0 mb-1.5 inline-flex items-center gap-[7px] eyebrow text-gold">

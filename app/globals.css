@@ -76,6 +76,8 @@
   /* Pas de double-tap zoom sur les éléments interactifs (touch-action: manipulation). */
   button, a, input, select, textarea, label { touch-action: manipulation; }
   html { height: 100%; }
+  /* Coque de l'app montée : le document est figé, seul <main> défile. */
+  .app-shell-lock, .app-shell-lock body { position: fixed; inset: 0; width: 100%; height: 100%; overflow: hidden; }
   body { @apply bg-page text-ink font-sans; overscroll-behavior-y: none; overflow-x: hidden; }
   /* Safari iOS : les enfants animés (étoiles) ne doivent jamais élargir un conteneur qui défile. */
   .animate-float-star, .animate-twinkle, .animate-spin-slow { will-change: transform; }
