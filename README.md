@@ -73,13 +73,9 @@ La même vérification tourne en CI (`.github/workflows/db-test.yml`) à chaque 
 
 ### Premier admin
 
-Après avoir créé ton compte avec un code (ou en insérant une ligne dans `invites` via le SQL editor) :
-
-```sql
-update public.profiles set is_admin = true where display_name = 'TonPseudo';
-```
-
-Le premier code d'invitation se crée aussi en SQL : `insert into public.invites (code) values ('STARAC26');`
+Le tout premier profil créé devient automatiquement organisateur (migration 0005). Il suffit d'un
+premier code d'invitation, posé en SQL : `insert into public.invites (code) values ('STARAC26');`
+Les codes suivants se créent depuis le back-office.
 
 ### Supabase : réglages à faire une fois
 
@@ -87,6 +83,9 @@ Le premier code d'invitation se crée aussi en SQL : `insert into public.invites
   `https://quicestquivagagnerlastarac.fr/**` et `http://localhost:3000/**`.
 - **Auth → Email** : magic link activé (par défaut).
 - **Realtime** : la publication `supabase_realtime` est alimentée par la migration 0003.
+- **Linter** : les trois vues (`ranking_items_public`, `score_events`, `leaderboard`) sont volontairement
+  `security definer` — c'est ce qui permet de projeter des positions sans la colonne `comment` ; elles
+  portent elles-mêmes le filtre membre + révélation. L'avertissement correspondant est attendu.
 - **Storage** : buckets `chat-images` et `contestant-photos` créés par la migration 0004.
 
 ## Déploiement
