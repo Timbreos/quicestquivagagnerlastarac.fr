@@ -83,15 +83,16 @@ export default function ReglesPage() {
           <p className="m-0 text-[15px] leading-[1.55] [text-wrap:pretty]">{r.a}</p>
         </section>
       ))}
-      <table className="w-full mt-1 border-collapse card overflow-hidden">
-        <caption className="text-left font-display font-bold text-base px-4 pt-3.5 pb-2">Le barème, lu dans la base</caption>
+      <div className="card overflow-x-auto mt-1">
+      <table className="w-full border-collapse">
+        <caption className="text-left font-display font-bold text-base px-3 pt-3.5 pb-2">Le barème, lu dans la base</caption>
         <thead>
           <tr className="text-xs text-ink-2">
-            <th scope="col" className="text-left font-semibold px-4 py-1.5">Place de sortie</th>
-            <th scope="col" className="text-right font-semibold px-2 py-1.5">Exact</th>
-            <th scope="col" className="text-right font-semibold px-2 py-1.5">Nominé</th>
-            <th scope="col" className="text-right font-semibold px-2 py-1.5">Ph. 2 exact</th>
-            <th scope="col" className="text-right font-semibold px-4 py-1.5">Ph. 2 nominé</th>
+            <th scope="col" className="text-left font-semibold px-3 py-1.5">Sortie</th>
+            <th scope="col" className="text-right font-semibold px-1.5 py-1.5">Exact</th>
+            <th scope="col" className="text-right font-semibold px-1.5 py-1.5">Nominé</th>
+            <th scope="col" className="text-right font-semibold px-1.5 py-1.5"><abbr title="Phase 2, exact" className="no-underline">P2 ex.</abbr></th>
+            <th scope="col" className="text-right font-semibold px-3 py-1.5"><abbr title="Phase 2, nominé" className="no-underline">P2 nom.</abbr></th>
           </tr>
         </thead>
         <tbody>
@@ -99,20 +100,21 @@ export default function ReglesPage() {
             const r2 = p2.find((x) => x.exit_place_min === r.exit_place_min);
             return (
               <tr key={r.id}>
-                <th scope="row" className="text-left font-medium text-[15px] px-4 py-2.5 border-t border-page">{bandLabel(r, n)}</th>
-                <td className="text-right font-display font-bold text-base px-2 py-2.5 border-t border-page text-violet-dark">{r.points_exact}</td>
-                <td className="text-right font-display font-bold text-base px-2 py-2.5 border-t border-page text-violet-dark">{r.points_nominated}</td>
-                <td className="text-right font-display font-bold text-base px-2 py-2.5 border-t border-page text-ink-2">{r2?.points_exact ?? "—"}</td>
-                <td className="text-right font-display font-bold text-base px-4 py-2.5 border-t border-page text-ink-2">{r2?.points_nominated ?? "—"}</td>
+                <th scope="row" className="text-left font-medium text-sm px-3 py-2.5 border-t border-page whitespace-nowrap">{bandLabel(r, n)}</th>
+                <td className="text-right font-display font-bold text-base px-1.5 py-2.5 border-t border-page text-violet-dark">{r.points_exact}</td>
+                <td className="text-right font-display font-bold text-base px-1.5 py-2.5 border-t border-page text-violet-dark">{r.points_nominated}</td>
+                <td className="text-right font-display font-bold text-base px-1.5 py-2.5 border-t border-page text-ink-2">{r2?.points_exact ?? "—"}</td>
+                <td className="text-right font-display font-bold text-base px-3 py-2.5 border-t border-page text-ink-2">{r2?.points_nominated ?? "—"}</td>
               </tr>
             );
           })}
           <tr>
-            <th scope="row" className="text-left font-medium text-[15px] px-4 py-2.5 border-t border-page">Pronostic de la semaine juste</th>
-            <td colSpan={4} className="text-right font-display font-bold text-base px-4 py-2.5 border-t border-page text-gold-ink">+{bonus}</td>
+            <th scope="row" className="text-left font-medium text-sm px-3 py-2.5 border-t border-page">Pronostic de la semaine juste</th>
+            <td colSpan={4} className="text-right font-display font-bold text-base px-3 py-2.5 border-t border-page text-gold-ink">+{bonus}</td>
           </tr>
         </tbody>
       </table>
+      </div>
       <p className="m-0 text-xs text-ink-2">Phase 2 : à partir de {t} élèves restants. Le barème est modifiable par l&apos;organisateur d&apos;une saison à l&apos;autre.</p>
     </div>
   );

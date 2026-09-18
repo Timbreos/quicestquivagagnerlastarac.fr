@@ -39,11 +39,11 @@ export function Leaderboard({ progress = false, footer = true }: { progress?: bo
                   {rank ?? "—"}
                 </span>
                 <Pastille name={r.display_name} photo={r.avatar_url} size={30} tone={isLeader ? "gold" : isMe ? "violet" : "dark"} ring={isLeader} />
-                <span className="flex-1 min-w-0 text-[15px] font-medium whitespace-nowrap overflow-hidden text-ellipsis">{r.display_name}</span>
+                <span className="flex-1 min-w-[44px] text-[15px] font-medium whitespace-nowrap overflow-hidden text-ellipsis">{r.display_name}</span>
                 {isMe ? <span className="badge-violet">toi</span> : null}
-                {r.is_admin ? <span className="badge bg-page text-ink-2">orga</span> : null}
-                {!r.has_submitted ? <span className="badge-gold">{pendingLabel}</span> : null}
-                <span className={`font-display font-extrabold min-w-[38px] text-right ${isLeader ? "text-[19px] text-gold-ink" : "text-base"}`}>
+                {r.is_admin ? <span className="badge bg-page text-ink-2 hidden sm:inline-flex">orga</span> : null}
+                {!r.has_submitted ? <span className="badge-gold shrink-0">{pendingLabel}</span> : null}
+                <span className={`font-display font-extrabold min-w-[38px] shrink-0 text-right ${isLeader ? "text-[19px] text-gold-ink" : "text-base"}`}>
                   {r.has_submitted ? r.total_points : "—"}
                 </span>
                 {progress && r.has_submitted ? (

@@ -79,9 +79,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="relative max-w-[1480px] mx-auto px-4 pt-3.5 lg:pb-3.5 flex items-center justify-between gap-3">
           <Link href="/" className="flex items-center gap-2.5 min-w-0 text-white hover:text-white no-underline">
             <LogoMark />
-            <span className="min-w-0 font-display font-extrabold italic text-base leading-[1.05] tracking-[-0.025em]">
+            <span className="min-w-0 font-display font-extrabold italic text-[15px] sm:text-base leading-[1.05] tracking-[-0.025em]">
               <span className="block whitespace-nowrap overflow-hidden text-ellipsis">qui c&apos;est qui va gagner</span>
-              <span className="block">
+              <span className="block whitespace-nowrap overflow-hidden text-ellipsis">
                 la <span className="text-gold">starac</span>
               </span>
             </span>
@@ -116,7 +116,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   id="season-select"
                   value={store.season?.id ?? ""}
                   onChange={(e) => store.selectSeason(e.target.value)}
-                  className="min-w-0 w-[120px] sm:w-auto sm:max-w-[160px] min-h-9 rounded-[9px] bg-white/10 text-white text-xs px-2 border border-violet"
+                  className="min-w-0 w-[92px] min-[400px]:w-[120px] sm:w-auto sm:max-w-[160px] min-h-9 rounded-[9px] bg-white/10 text-white text-xs px-2 border border-violet"
                 >
                   {store.seasons.map((s) => (
                     <option key={s.id} value={s.id} className="text-ink">
