@@ -8,6 +8,7 @@ import { IconAdmin, IconClose, IconGroup, IconHome, IconMore, IconPoints, IconPr
 import { Pastille } from "@/components/ui/Pastille";
 import { Loading } from "@/components/ui/Feedback";
 import { PrimeOverlay } from "@/components/prime/PrimeOverlay";
+import { InstallPrompt } from "@/components/shell/Pwa";
 import { useSeason } from "@/lib/season";
 import { currentWeek } from "@/lib/derive";
 
@@ -79,7 +80,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     // Coque ancrée à la fenêtre visible : le document ne défile jamais, seul <main>
     // défile. En-tête et barre basse restent en place quoi que fasse Safari.
     <div data-app-shell className="fixed top-0 left-0 w-full h-dvh flex flex-col overflow-hidden">
-      <header className="bg-violet-dark text-white relative overflow-hidden shrink-0 [clip-path:inset(0)]">
+      <header className="bg-violet-dark text-white relative overflow-hidden shrink-0 [clip-path:inset(0)]" style={{ paddingTop: "env(safe-area-inset-top)" }}>
         <Etoile
           size={120}
           className="absolute -top-[34px] -right-[14px] opacity-[.13] animate-float-star"
@@ -192,6 +193,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </div>
       ) : null}
+
+      <InstallPrompt />
 
       <nav
         aria-label="Écrans"
