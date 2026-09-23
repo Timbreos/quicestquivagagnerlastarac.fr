@@ -81,7 +81,10 @@ Les codes suivants se créent depuis le back-office.
 
 - **Auth → URL configuration** : Site URL `https://quicestquivagagnerlastarac.fr`, redirect URLs
   `https://quicestquivagagnerlastarac.fr/**` et `http://localhost:3000/**`.
-- **Auth → Email** : magic link activé (par défaut).
+- **Auth → Email Templates** : coller `supabase/templates/magic_link.html` dans **Magic Link** et dans **Confirm signup**
+  (sujet : « Ton entrée pour la Starac »). Le gabarit contient `{{ .ConfirmationURL }}` et `{{ .Token }}` : le code à six
+  chiffres permet de se connecter depuis l'app installée, où le lien magique (PKCE) ne fonctionne pas.
+- **Auth → Providers → Email** : « Confirm email » peut rester activé ; l'OTP à 6 chiffres et une validité d'une heure sont les défauts.
 - **Realtime** : la publication `supabase_realtime` est alimentée par la migration 0003.
 - **Linter** : les trois vues (`ranking_items_public`, `score_events`, `leaderboard`) sont volontairement
   `security definer` — c'est ce qui permet de projeter des positions sans la colonne `comment` ; elles

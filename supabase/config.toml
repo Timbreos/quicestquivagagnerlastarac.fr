@@ -32,6 +32,17 @@ enable_signup = true
 enable_signup = true
 double_confirm_changes = true
 enable_confirmations = false
+otp_length = 6
+otp_expiry = 3600
+
+# Même gabarit pour le lien magique et la première connexion (signInWithOtp crée le compte).
+[auth.email.template.magic_link]
+subject = "Ton entrée pour la Starac"
+content_path = "./templates/magic_link.html"
+
+[auth.email.template.confirmation]
+subject = "Ton entrée pour la Starac"
+content_path = "./templates/magic_link.html"
 
 [storage]
 enabled = true

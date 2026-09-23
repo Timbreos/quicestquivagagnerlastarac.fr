@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Ton entrée pour la Starac</title>
+</head>
+<body style="margin:0;padding:0;background:#F4F1FA;font-family:'Instrument Sans',Helvetica,Arial,sans-serif;color:#201736;">
+  <!-- Aperçu dans la boîte de réception -->
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">Ton lien de connexion, et ton code si tu es sur téléphone. Valable une heure.</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F1FA;padding:24px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:440px;">
+          <!-- Mot-marque -->
+          <tr>
+            <td style="padding:0 6px 16px;">
+              <table role="presentation" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="vertical-align:middle;padding-right:10px;">
+                    <img src="https://quicestquivagagnerlastarac.fr/icons/icon-192.png" width="40" height="40" alt="" style="display:block;border-radius:12px;">
+                  </td>
+                  <td style="vertical-align:middle;font-family:Archivo,'Instrument Sans',Helvetica,Arial,sans-serif;font-weight:800;font-style:italic;font-size:17px;line-height:1.1;color:#3A1F8C;">
+                    qui c'est qui va gagner<br>la <span style="color:#B07607;">starac</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <!-- Carte -->
+          <tr>
+            <td style="background:#FFFFFF;border:1px solid #E2DCF0;border-radius:22px;padding:22px 20px;">
+              <h1 style="margin:0 0 8px;font-family:Archivo,'Instrument Sans',Helvetica,Arial,sans-serif;font-weight:800;font-size:24px;line-height:1.15;letter-spacing:-.02em;color:#201736;">Ton entrée pour la Starac</h1>
+              <p style="margin:0 0 18px;font-size:15px;line-height:1.5;color:#66607F;">Un tap sur le bouton et tu es connecté, sans mot de passe. Le lien vaut une heure.</p>
+
+              <!-- Bouton -->
+              <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="center" style="border-radius:14px;background:#5A2FC2;">
+                    <a href="{{ .ConfirmationURL }}" style="display:block;padding:15px 20px;font-family:Archivo,'Instrument Sans',Helvetica,Arial,sans-serif;font-weight:800;font-size:16px;color:#FFFFFF;text-decoration:none;border-radius:14px;">Me connecter</a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Code -->
+              <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-top:18px;background:#FFF8E8;border:1px solid #F0B93B;border-radius:14px;">
+                <tr>
+                  <td style="padding:14px 16px;">
+                    <p style="margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#B07607;">Sur téléphone ou dans l'app installée</p>
+                    <p style="margin:0 0 8px;font-size:14px;line-height:1.5;color:#201736;">Si le bouton ouvre le mauvais navigateur, retourne dans l'app et tape ce code :</p>
+                    <p style="margin:0;font-family:Archivo,'Instrument Sans',Helvetica,Arial,sans-serif;font-weight:800;font-size:32px;letter-spacing:.18em;color:#201736;">{{ .Token }}</p>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:18px 0 0;font-size:13px;line-height:1.5;color:#66607F;">Nouveau dans la ligue ? Une fois connecté, l'app te demandera ton code d'invitation, celui que l'organisateur t'a envoyé.</p>
+            </td>
+          </tr>
+          <!-- Pied -->
+          <tr>
+            <td style="padding:14px 8px 0;font-size:12px;line-height:1.5;color:#66607F;">
+              Tu n'as rien demandé ? Ignore ce message, personne ne peut entrer sans lui.<br>
+              Envoyé pour <span style="color:#201736;">{{ .Email }}</span> · <a href="https://quicestquivagagnerlastarac.fr" style="color:#5A2FC2;">quicestquivagagnerlastarac.fr</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
