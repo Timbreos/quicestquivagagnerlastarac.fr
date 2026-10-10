@@ -98,6 +98,15 @@ export type ContestantNote = {
   updated_at: string;
 };
 
+/** Étoiles privées (1 à 5) d'un joueur sur un élève. */
+export type ContestantRating = {
+  user_id: string;
+  contestant_id: string;
+  season_id: string;
+  stars: number;
+  updated_at: string;
+};
+
 export type WeeklyPick = { week_id: string; user_id: string; contestant_id: string; created_at: string };
 
 export type ScoringRule = {
@@ -185,6 +194,7 @@ export type Database = {
       rankings: Table<Ranking, Pick<Ranking, "season_id" | "user_id" | "phase"> & Partial<Ranking>>;
       ranking_items: Table<RankingItem, Pick<RankingItem, "ranking_id" | "contestant_id"> & Partial<RankingItem>>;
       contestant_notes: Table<ContestantNote, Pick<ContestantNote, "season_id" | "contestant_id" | "body"> & Partial<ContestantNote>>;
+      contestant_ratings: Table<ContestantRating, Pick<ContestantRating, "season_id" | "contestant_id" | "stars"> & Partial<ContestantRating>>;
       weekly_picks: Table<WeeklyPick, Pick<WeeklyPick, "week_id" | "user_id" | "contestant_id"> & Partial<WeeklyPick>>;
       scoring_rules: Table<
         ScoringRule,

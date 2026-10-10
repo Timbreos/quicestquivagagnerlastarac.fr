@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Pastille } from "@/components/ui/Pastille";
 import { EmptyBox } from "@/components/ui/Feedback";
+import { CarnetButton, MyStars } from "@/components/carnet/Carnet";
 import { useSeason } from "@/lib/season";
 import { contestantStatus, currentWeek, nomineesOf } from "@/lib/derive";
 import { ord } from "@/lib/format";
@@ -32,21 +33,23 @@ export function CastingGrid({ title = "Le casting", compact = false }: { title?:
           {store.contestants.map((c, k) => {
             const st = contestantStatus(c, store.eliminations, nominees);
             return (
-              <li key={c.id} className="animate-pop" style={{ animationDelay: `${Math.min(k * 0.03, 0.4)}s` }}>
+              <li key={c.id} className="relative animate-pop" style={{ animationDelay: `${Math.min(k * 0.03, 0.4)}s` }}>
                 <Link
                   href={`/eleves/?id=${c.id}`}
-                  className={`flex flex-col items-center gap-1.5 p-2 rounded-sm border text-center no-underline text-ink ${
+                  className={`h-full flex flex-col items-center gap-1.5 p-2 rounded-sm border text-center no-underline text-ink ${
                     st.kind === "eliminated" ? "bg-page border-line" : st.kind === "nominated" ? "bg-gold-veil border-gold-line" : "bg-page border-line hover:bg-violet-veil hover:border-violet-line"
                   }`}
                 >
                   <Pastille name={c.full_name} photo={c.photo_url} size={size} display tone={st.kind === "eliminated" ? "grey" : "violet"} />
                   <span className={`text-[13px] font-medium leading-[1.2] ${st.kind === "eliminated" ? "text-ink-2 line-through" : ""}`}>{c.full_name}</span>
+                  <MyStars contestantId={c.id} size={12} />
                   {st.kind === "eliminated" ? (
                     <span className="badge-ko">{st.exit_place === 1 ? "vainqueur" : `sorti ${ord(st.exit_place)}`}</span>
                   ) : st.kind === "nominated" ? (
                     <span className="badge-gold">nominé</span>
                   ) : null}
                 </Link>
+                <CarnetButton contestant={c} className="absolute top-1 right-1" />
               </li>
             );
           })}
