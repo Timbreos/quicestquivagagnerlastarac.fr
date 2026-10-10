@@ -169,11 +169,11 @@ export function ContestantsPanel() {
               type="button"
               onClick={() => quickFileRef.current?.click()}
               aria-label={quickFile ? "Changer la photo" : "Prendre une photo"}
-              className="w-14 h-14 shrink-0 rounded-full border-2 border-dashed border-violet-line bg-surface grid place-items-center overflow-hidden text-violet text-xs font-semibold"
+              className="w-14 h-14 shrink-0 rounded-full border-2 border-dashed border-violet-line bg-surface relative grid place-items-center overflow-hidden text-violet text-xs font-semibold"
             >
               {quickPreview ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={quickPreview} alt="" className="w-full h-full object-cover" />
+                <img src={quickPreview} alt="" className="absolute inset-0 w-full h-full max-w-none object-cover object-center" />
               ) : (
                 "Photo"
               )}
