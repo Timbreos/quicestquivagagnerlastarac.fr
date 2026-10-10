@@ -33,7 +33,7 @@ export function Pastille({
   const fontSize = size >= 64 ? Math.round(size * 0.34) : size >= 40 ? 14 : size >= 30 ? 11 : 10;
   return (
     <span
-      className={`grid place-items-center shrink-0 rounded-full overflow-hidden font-semibold ${display ? "font-display font-extrabold" : ""} ${className}`}
+      className={`relative grid place-items-center shrink-0 rounded-full overflow-hidden font-semibold ${display ? "font-display font-extrabold" : ""} ${className}`}
       style={{
         width: size,
         height: size,
@@ -46,7 +46,7 @@ export function Pastille({
     >
       {photo ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={photo} alt={name} width={size} height={size} className="w-full h-full object-cover" />
+        <img src={photo} alt={name} width={size} height={size} className="absolute inset-0 w-full h-full max-w-none object-cover object-center" />
       ) : (
         initials(name)
       )}
