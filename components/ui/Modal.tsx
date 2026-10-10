@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 export function Modal({
   open,
@@ -35,7 +36,8 @@ export function Modal({
   }, [open, onClose]);
 
   if (!open) return null;
-  return (
+  // Rendue dans <body> : un parent animé (transform) piégerait sinon le position: fixed dans sa boîte.
+  return createPortal(
     <div
       className={`fixed inset-0 z-50 flex justify-center p-4 ${align === "bottom" ? "items-end" : "items-center"}`}
       style={{ background: "rgba(32,23,54,.55)" }}
@@ -53,6 +55,7 @@ export function Modal({
       >
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
