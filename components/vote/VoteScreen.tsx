@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Modal } from "@/components/ui/Modal";
 import { Pastille } from "@/components/ui/Pastille";
 import { ErrorBox } from "@/components/ui/Feedback";
+import { CarnetButton, CarnetModal, MyStars } from "@/components/carnet/Carnet";
 import { NomineeButtons, useWeeklyPick } from "@/components/home/WeeklyPick";
 import { useSeason } from "@/lib/season";
 import { supabase } from "@/lib/supabase/client";
@@ -40,9 +41,7 @@ export function VoteScreen({ phase }: { phase: 1 | 2 }) {
   const [picked, setPicked] = useState<number | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [noteFor, setNoteFor] = useState<string | null>(null);
-  const [noteText, setNoteText] = useState("");
-  const [noteBusy, setNoteBusy] = useState(false);
+  const [carnetFor, setCarnetFor] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -137,19 +136,6 @@ export function VoteScreen({ phase }: { phase: 1 | 2 }) {
     setConfirmClear(false);
     setPicked(null);
     update(Array(N).fill(null));
-  }
-
-  async function saveNote() {
-    if (!season || !noteFor) return;
-    setNoteBusy(true);
-    const { error } = await supabase().rpc("set_note", { p_season_id: season.id, p_phase: phase, p_contestant_id: noteFor, p_comment: noteText });
-    setNoteBusy(false);
-    if (error) {
-      setSaveError(error.message);
-      return;
-    }
-    setNoteFor(null);
-    await store.refresh();
   }
 
   async function doValidate() {
@@ -260,15 +246,18 @@ export function VoteScreen({ phase }: { phase: 1 | 2 }) {
             {pool.length === 0 ? <p className="m-0 text-sm text-ok font-medium">Les {N} sont placés. Relis, puis valide.</p> : null}
             <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(104px, 1fr))" }}>
               {pool.map((c) => (
+                <div key={c.id} className="relative">
                 <button
-                  key={c.id}
                   type="button"
                   onClick={() => place(c.id)}
-                  className="flex flex-col gap-1.5 min-h-16 p-2 border border-line rounded-sm bg-page text-ink text-left cursor-pointer animate-pop transition-[transform,border-color,background] duration-150 hover:border-violet-line hover:bg-violet-veil hover:-translate-y-0.5"
+                  className="w-full h-full flex flex-col gap-1.5 min-h-16 p-2 border border-line rounded-sm bg-page text-ink text-left cursor-pointer animate-pop transition-[transform,border-color,background] duration-150 hover:border-violet-line hover:bg-violet-veil hover:-translate-y-0.5"
                 >
                   <Pastille name={c.full_name} photo={c.photo_url} size={30} />
                   <span className="text-[13px] font-medium leading-[1.2]">{shortName(c.full_name)}</span>
+                  <MyStars contestantId={c.id} size={11} />
                 </button>
+                <CarnetButton contestant={c} phase={phase} className="absolute top-1 right-1" />
+                </div>
               ))}
             </div>
             {pool.length > 0 ? (
@@ -321,14 +310,12 @@ export function VoteScreen({ phase }: { phase: 1 | 2 }) {
                       ) : null}
                       <button
                         type="button"
-                        onClick={() => {
-                          setNoteFor(c.id);
-                          setNoteText(notes.get(c.id) ?? "");
-                        }}
+                        onClick={() => setCarnetFor(c.id)}
                         aria-label={`Carnet privé : ${c.full_name}`}
-                        className="w-11 h-11 border border-gold-line rounded-[10px] bg-gold-veil text-gold-ink text-[15px] font-bold cursor-pointer transition-colors hover:bg-[#F7EBCF]"
+                        title="Mon carnet privé"
+                        className="w-11 h-11 border border-gold-line rounded-[10px] bg-gold-veil text-gold-ink font-display font-extrabold italic text-base cursor-pointer transition-colors hover:bg-[#F7EBCF]"
                       >
-                        ✎
+                        i
                       </button>
                     </span>
                   ) : null}
@@ -379,7 +366,7 @@ export function VoteScreen({ phase }: { phase: 1 | 2 }) {
           <h2 className="card-title text-[15px] mb-1">Le carnet</h2>
           <p className="m-0 mb-3 text-[13px] text-ink-2 [text-wrap:pretty]">Une note par élève placé. Elle ne sort jamais de cet écran, même après la révélation des classements.</p>
           {notes.size === 0 ? (
-            <p className="m-0 text-[13px] text-ink-2">Aucune note pour l&apos;instant. Le bouton ✎ d&apos;une ligne en ouvre une.</p>
+            <p className="m-0 text-[13px] text-ink-2">Aucune note pour l&apos;instant. Le bouton (i) d&apos;une ligne ouvre ton carnet : étoiles et notes.</p>
           ) : (
             <ul className="list-none m-0 p-0 flex flex-col gap-2.5">
               {[...notes.entries()].map(([cid, text]) => {
@@ -387,14 +374,7 @@ export function VoteScreen({ phase }: { phase: 1 | 2 }) {
                 const idx = slots.indexOf(cid);
                 return (
                   <li key={cid} className="bg-gold-veil border border-gold-line rounded-sm p-2.5">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setNoteFor(cid);
-                        setNoteText(text);
-                      }}
-                      className="block w-full text-left cursor-pointer"
-                    >
+                    <button type="button" onClick={() => setCarnetFor(cid)} className="block w-full text-left cursor-pointer">
                       <p className="m-0 mb-1 text-xs font-semibold text-gold-ink">
                         {c?.full_name ?? "?"} · {idx < 0 ? "non placé" : ord(idx + 1)}
                       </p>
@@ -430,30 +410,9 @@ export function VoteScreen({ phase }: { phase: 1 | 2 }) {
         </section>
       </aside>
 
-      <Modal open={noteFor !== null} onClose={() => setNoteFor(null)} label="Carnet privé" align="bottom">
-        <h2 className="m-0 mb-1 font-display font-bold text-lg">Carnet privé — {noteFor ? byId.get(noteFor)?.full_name : ""}</h2>
-        <p className="m-0 mb-3 text-[13px] text-ink-2 [text-wrap:pretty]">Ce n&apos;est pas un commentaire. Personne ne le lira, même après la révélation des classements.</p>
-        <label htmlFor="note-field" className="label">
-          Ma note
-        </label>
-        <textarea
-          id="note-field"
-          rows={4}
-          value={noteText}
-          maxLength={1000}
-          onChange={(e) => setNoteText(e.target.value)}
-          placeholder="Pourquoi tu l'as mis là"
-          className="field py-2.5 leading-[1.5] resize-y"
-        />
-        <div className="flex gap-2 mt-3.5">
-          <button type="button" onClick={() => setNoteFor(null)} className="btn-muted flex-1">
-            Annuler
-          </button>
-          <button type="button" onClick={saveNote} disabled={noteBusy} className="btn-primary flex-1">
-            {noteBusy ? "…" : "Garder dans mon carnet"}
-          </button>
-        </div>
-      </Modal>
+      {carnetFor && byId.get(carnetFor) ? (
+        <CarnetModal contestant={byId.get(carnetFor)!} phase={phase} open onClose={() => setCarnetFor(null)} />
+      ) : null}
 
       <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)} label="Valider mon classement" maxWidth={400}>
         <h2 className="m-0 mb-1.5 font-display font-extrabold italic text-[21px]">C&apos;est irréversible</h2>
@@ -494,6 +453,7 @@ function SlotButton({
       <span className={`flex-1 min-w-0 text-left text-[15px] font-medium whitespace-nowrap overflow-hidden text-ellipsis ${eliminatedAt ? "line-through text-ink-2" : ""}`}>
         {c ? c.full_name : "Place libre"}
       </span>
+      {c ? <MyStars contestantId={c.id} size={12} compact /> : null}
       {eliminatedAt ? <span className="badge-ko">{eliminatedAt === 1 ? "vainqueur" : `sorti ${ord(eliminatedAt)}`}</span> : null}
       {hasNote ? (
         <svg viewBox="0 0 24 24" width="16" height="16" aria-label="carnet rempli" className="shrink-0">

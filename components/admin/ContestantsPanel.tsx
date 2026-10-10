@@ -24,6 +24,8 @@ export function ContestantsPanel() {
   const [editing, setEditing] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editBio, setEditBio] = useState("");
+  const [placing, setPlacing] = useState<string | null>(null);
+  const [placeAt, setPlaceAt] = useState("");
   const fileFor = useRef<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const nominees = nomineesOf(currentWeek(store.weeks), store.nominations);
@@ -115,6 +117,19 @@ export function ContestantsPanel() {
     const j = i + d;
     if (j < 0 || j >= list.length) return;
     [list[i], list[j]] = [list[j], list[i]];
+    await reorder(list);
+  }
+
+  /** Intercale l'élève à la position demandée (1 = premier), les autres glissent d'un cran. */
+  async function moveTo(c: Contestant, position: number) {
+    const list = store.contestants.filter((x) => x.id !== c.id);
+    const at = Math.min(Math.max(Math.round(position), 1), list.length + 1) - 1;
+    list.splice(at, 0, c);
+    setPlacing(null);
+    await reorder(list);
+  }
+
+  async function reorder(list: Contestant[]) {
     await run(async () => {
       for (let k = 0; k < list.length; k++) {
         if (list[k].display_order !== k + 1) {
@@ -188,6 +203,7 @@ export function ContestantsPanel() {
           const isEditing = editing === c.id;
           return (
             <li key={c.id} className="flex flex-wrap items-center gap-2.5 py-2 border-t border-page">
+              <span className="w-6 shrink-0 text-right font-display font-bold text-sm text-ink-2">{i + 1}</span>
               <Pastille name={c.full_name} photo={c.photo_url} size={28} tone={st.kind === "eliminated" ? "grey" : "violet"} />
               {isEditing ? (
                 <form
@@ -218,6 +234,44 @@ export function ContestantsPanel() {
                   <span className="flex gap-1">
                     <button type="button" aria-label="Monter" disabled={busy || i === 0} onClick={() => move(c, -1)} className="w-11 h-11 border border-line rounded-[10px] bg-surface text-violet-dark disabled:opacity-40">↑</button>
                     <button type="button" aria-label="Descendre" disabled={busy || i === store.contestants.length - 1} onClick={() => move(c, 1)} className="w-11 h-11 border border-line rounded-[10px] bg-surface text-violet-dark disabled:opacity-40">↓</button>
+                    {placing === c.id ? (
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          const n = Number(placeAt);
+                          if (Number.isFinite(n) && n >= 1) void moveTo(c, n);
+                        }}
+                        className="flex gap-1"
+                      >
+                        <label htmlFor={`pos-${c.id}`} className="sr-only-label">Nouvelle position de {c.full_name}</label>
+                        <input
+                          id={`pos-${c.id}`}
+                          type="number"
+                          inputMode="numeric"
+                          min={1}
+                          max={store.contestants.length}
+                          value={placeAt}
+                          onChange={(e) => setPlaceAt(e.target.value)}
+                          autoFocus
+                          className="field w-16 text-center"
+                        />
+                        <button type="submit" disabled={busy || !placeAt} className="btn-primary text-sm">OK</button>
+                        <button type="button" onClick={() => setPlacing(null)} aria-label="Annuler" className="btn-muted text-sm">×</button>
+                      </form>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={busy || store.contestants.length < 2}
+                        onClick={() => {
+                          setPlacing(c.id);
+                          setPlaceAt(String(i + 1));
+                        }}
+                        title="Placer à une position précise"
+                        className="btn-muted text-sm"
+                      >
+                        Position…
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => {

@@ -101,6 +101,6 @@ dans les réglages du dépôt, et pointer le DNS du domaine vers GitHub Pages.
 ## Sécurité
 
 - Les classements des autres ne sont lisibles qu'après révélation (policy RLS + vue `ranking_items_public`).
-- La colonne `ranking_items.comment` (carnet privé) n'est lisible que par son auteur, sans exception.
+- Le carnet privé (`ranking_items.comment`, `contestant_notes`, étoiles `contestant_ratings`) n'est lisible que par son auteur, sans exception.
 - La fermeture des votes et des pronostics est vérifiée par les policies et les triggers, pas par un bouton grisé.
 - Un utilisateur connecté sans profil (pas de code d'invitation) ne voit rien.

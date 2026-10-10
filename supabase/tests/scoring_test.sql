@@ -332,4 +332,25 @@ begin
   perform pg_temp.assert_eq('carnet : l''auteur supprime la sienne',
     pg_temp.denied_as(u1, format('delete from public.contestant_notes where user_id = %L and body = %L', u1, 'Belle évaluation')), false);
   perform pg_temp.assert_eq('carnet : une note restante', (select count(*) from public.contestant_notes where user_id = u1), 1::bigint);
+
+  -- Étoiles privées
+  perform pg_temp.assert_eq('étoiles : u1 note A',
+    pg_temp.denied_as(u1, format('insert into public.contestant_ratings (season_id, contestant_id, stars) values (%L, %L, 4)', sid, cA)), false);
+  perform pg_temp.assert_eq('étoiles : u1 change sa note (upsert)',
+    pg_temp.denied_as(u1, format('insert into public.contestant_ratings (season_id, contestant_id, stars) values (%L, %L, 5) on conflict (user_id, contestant_id) do update set stars = excluded.stars', sid, cA)), false);
+  perform pg_temp.assert_eq('étoiles : valeur retenue', (select stars from public.contestant_ratings where user_id = u1 and contestant_id = cA), 5::smallint);
+  perform pg_temp.assert_eq('étoiles : 6 refusé',
+    pg_temp.denied_as(u1, format('insert into public.contestant_ratings (season_id, contestant_id, stars) values (%L, %L, 6)', sid, cB)), true);
+  perform pg_temp.assert_eq('étoiles : 0 refusé',
+    pg_temp.denied_as(u1, format('insert into public.contestant_ratings (season_id, contestant_id, stars) values (%L, %L, 0)', sid, cB)), true);
+  perform pg_temp.assert_eq('étoiles : au nom d''un autre refusé',
+    pg_temp.denied_as(u2, format('insert into public.contestant_ratings (season_id, user_id, contestant_id, stars) values (%L, %L, %L, 1)', sid, u1, cB)), true);
+  perform pg_temp.assert_eq('étoiles : invisibles pour les autres',
+    pg_temp.count_as(u2, 'select 1 from public.contestant_ratings'), 0::bigint);
+  perform pg_temp.denied_as(u2, format('update public.contestant_ratings set stars = 1 where contestant_id = %L', cA));
+  perform pg_temp.denied_as(u2, format('delete from public.contestant_ratings where contestant_id = %L', cA));
+  perform pg_temp.assert_eq('étoiles : intactes face aux autres', (select stars from public.contestant_ratings where user_id = u1 and contestant_id = cA), 5::smallint);
+  perform pg_temp.assert_eq('étoiles : l''auteur les retire',
+    pg_temp.denied_as(u1, format('delete from public.contestant_ratings where contestant_id = %L', cA)), false);
+  perform pg_temp.assert_eq('étoiles : plus rien', (select count(*) from public.contestant_ratings where user_id = u1), 0::bigint);
 end $$;

@@ -14,6 +14,7 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import type {
   Contestant,
+  ContestantRating,
   Elimination,
   LeaderboardRow,
   Nomination,
@@ -46,6 +47,10 @@ export type SeasonStore = {
   myRankings: Ranking[];
   myItems: RankingItem[];
   picks: WeeklyPick[];
+  /** Étoiles privées du joueur connecté, par élève. */
+  myStars: Map<string, number>;
+  /** Pose (1 à 5) ou retire (null) ses étoiles sur un élève. Optimiste ; renvoie l'erreur éventuelle. */
+  setStars: (contestantId: string, stars: number | null) => Promise<string | null>;
   loadingSeason: boolean;
   error: string | null;
   refresh: () => Promise<void>;
@@ -76,6 +81,7 @@ const EMPTY = {
   myRankings: [] as Ranking[],
   myItems: [] as RankingItem[],
   picks: [] as WeeklyPick[],
+  myRatings: [] as ContestantRating[],
 };
 
 export function SeasonProvider({ children }: { children: ReactNode }) {
@@ -159,7 +165,7 @@ export function SeasonProvider({ children }: { children: ReactNode }) {
     const uid = session.user.id;
     setLoadingSeason(!initialLoadDone.current);
     try {
-      const [contestants, weeks, eliminations, scoringRules, profiles, leaderboard, myRankings, seasonsRes] =
+      const [contestants, weeks, eliminations, scoringRules, profiles, leaderboard, myRankings, seasonsRes, myRatings] =
         await Promise.all([
           sb.from("contestants").select("*").eq("season_id", seasonId).order("display_order").order("full_name"),
           sb.from("weeks").select("*").eq("season_id", seasonId).order("number"),
@@ -169,8 +175,9 @@ export function SeasonProvider({ children }: { children: ReactNode }) {
           sb.from("leaderboard").select("*").eq("season_id", seasonId),
           sb.from("rankings").select("*").eq("season_id", seasonId).eq("user_id", uid),
           sb.from("seasons").select("*").order("created_at", { ascending: false }),
+          sb.from("contestant_ratings").select("*").eq("season_id", seasonId).eq("user_id", uid),
         ]);
-      const firstError = [contestants, weeks, eliminations, scoringRules, profiles, leaderboard, myRankings, seasonsRes]
+      const firstError = [contestants, weeks, eliminations, scoringRules, profiles, leaderboard, myRankings, seasonsRes, myRatings]
         .map((r) => r.error)
         .find(Boolean);
       if (firstError) throw firstError;
@@ -201,6 +208,7 @@ export function SeasonProvider({ children }: { children: ReactNode }) {
         myRankings: (myRankings.data ?? []) as Ranking[],
         myItems: (myItems.data ?? []) as RankingItem[],
         picks: (picks.data ?? []) as WeeklyPick[],
+        myRatings: (myRatings.data ?? []) as ContestantRating[],
       });
       setError(null);
       initialLoadDone.current = true;
@@ -253,6 +261,33 @@ export function SeasonProvider({ children }: { children: ReactNode }) {
     };
   }, [seasonId, session, refresh]);
 
+  const myStars = useMemo(() => new Map(data.myRatings.map((r) => [r.contestant_id, r.stars])), [data.myRatings]);
+
+  const setStars = useCallback(
+    async (contestantId: string, stars: number | null) => {
+      const uid = session?.user.id;
+      if (!seasonId || !uid) return "Pas de saison active.";
+      const before = data.myRatings;
+      const others = before.filter((r) => r.contestant_id !== contestantId);
+      const next = stars
+        ? [...others, { user_id: uid, contestant_id: contestantId, season_id: seasonId, stars, updated_at: new Date().toISOString() }]
+        : others;
+      setData((d) => ({ ...d, myRatings: next }));
+      const sb = supabase();
+      const { error } = stars
+        ? await sb
+            .from("contestant_ratings")
+            .upsert({ user_id: uid, contestant_id: contestantId, season_id: seasonId, stars }, { onConflict: "user_id,contestant_id" })
+        : await sb.from("contestant_ratings").delete().eq("user_id", uid).eq("contestant_id", contestantId);
+      if (error) {
+        setData((d) => ({ ...d, myRatings: before }));
+        return error.message;
+      }
+      return null;
+    },
+    [seasonId, session?.user.id, data.myRatings],
+  );
+
   const signOut = useCallback(async () => {
     await supabase().auth.signOut();
     setProfile(null);
@@ -271,6 +306,8 @@ export function SeasonProvider({ children }: { children: ReactNode }) {
       season,
       selectSeason: setSeasonId,
       ...data,
+      myStars,
+      setStars,
       loadingSeason,
       error,
       refresh,
@@ -280,7 +317,7 @@ export function SeasonProvider({ children }: { children: ReactNode }) {
       replayPrime: (e: Elimination) => setPrimeEvent(e),
       signOut,
     }),
-    [ready, session, profile, profileChecked, seasons, season, data, loadingSeason, error, refresh, reloadProfile, primeEvent, signOut],
+    [ready, session, profile, profileChecked, seasons, season, data, myStars, setStars, loadingSeason, error, refresh, reloadProfile, primeEvent, signOut],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

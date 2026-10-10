@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Pastille } from "@/components/ui/Pastille";
+import { MyStars } from "@/components/carnet/Carnet";
 import { EmptyBox, Loading, PageTitle } from "@/components/ui/Feedback";
 import { useSeason } from "@/lib/season";
 import { supabase } from "@/lib/supabase/client";
@@ -84,6 +85,7 @@ export default function VotesPage() {
                       <Link href={`/eleves/?id=${it.contestant_id}`} className={`flex-1 min-w-0 text-[13px] whitespace-nowrap overflow-hidden text-ellipsis no-underline ${gone ? "text-ko" : "text-ink"}`}>
                         {c ? shortName(c.full_name) : "?"}
                       </Link>
+                      <MyStars contestantId={it.contestant_id} size={10} compact />
                     </li>
                   );
                 })}
