@@ -1,16 +1,16 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Pastille } from "@/components/ui/Pastille";
 import { CastingGrid } from "@/components/home/CastingGrid";
-import { EmptyBox, Loading, PageTitle } from "@/components/ui/Feedback";
+import { EmptyBox, ErrorBox, Loading, PageTitle } from "@/components/ui/Feedback";
 import { useSeason } from "@/lib/season";
 import { supabase } from "@/lib/supabase/client";
 import { contestantStatus, currentWeek, nomineesOf, phaseIsOpen, phaseIsRevealed } from "@/lib/derive";
-import { ord, shortName } from "@/lib/format";
-import type { RankingItemPublic } from "@/lib/types";
+import { chatTime, firstName, ord, shortName } from "@/lib/format";
+import type { ContestantNote, RankingItemPublic } from "@/lib/types";
 
 function FicheEleve() {
   const store = useSeason();
@@ -129,7 +129,7 @@ function Placements({ rows, meId, revealed }: { rows: Array<{ p: RankingItemPubl
   );
 }
 
-/** Note privée du joueur connecté sur cet élève, par phase. Autosauvegarde. */
+/** Carnet privé du joueur connecté sur cet élève : un fil de notes datées, plus récentes en haut. */
 function NoteCard({ contestantId, name }: { contestantId: string; name: string }) {
   const store = useSeason();
   const season = store.season!;
@@ -140,11 +140,151 @@ function NoteCard({ contestantId, name }: { contestantId: string; name: string }
         <h2 className="m-0 mb-1 card-title text-base">Mon carnet privé</h2>
         <p className="m-0 text-[13px] text-gold-ink [text-wrap:pretty]">Visible par toi seul. Jamais publié, y compris après la révélation.</p>
       </div>
-      {phases.length === 0 ? <p className="m-0 text-sm text-ink-2">Le carnet s&apos;ouvre avec le vote.</p> : null}
-      {phases.map((ph) => (
-        <NoteField key={ph} phase={ph} contestantId={contestantId} name={name} />
-      ))}
+      <NoteJournal key={contestantId} contestantId={contestantId} name={name} />
+      {phases.length > 0 ? (
+        <div className="flex flex-col gap-3 pt-3 border-t border-gold-line">
+          <p className="m-0 text-xs font-semibold text-gold-ink">Note de classement</p>
+          {phases.map((ph) => (
+            <NoteField key={`${contestantId}-${ph}`} phase={ph} contestantId={contestantId} name={name} />
+          ))}
+        </div>
+      ) : null}
     </section>
+  );
+}
+
+function NoteJournal({ contestantId, name }: { contestantId: string; name: string }) {
+  const store = useSeason();
+  const season = store.season!;
+  const [notes, setNotes] = useState<ContestantNote[] | null>(null);
+  const [draft, setDraft] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
+
+  const load = useCallback(async () => {
+    const { data, error } = await supabase()
+      .from("contestant_notes")
+      .select("*")
+      .eq("season_id", season.id)
+      .eq("contestant_id", contestantId)
+      .order("created_at", { ascending: false });
+    if (error) setError(error.message);
+    else setNotes((data ?? []) as ContestantNote[]);
+  }, [season.id, contestantId]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  async function add(e: React.FormEvent) {
+    e.preventDefault();
+    if (!draft.trim()) return;
+    setBusy(true);
+    setError(null);
+    const { error } = await supabase().from("contestant_notes").insert({ season_id: season.id, contestant_id: contestantId, body: draft });
+    setBusy(false);
+    if (error) return setError(error.message);
+    setDraft("");
+    await load();
+  }
+
+  async function saveEdit(id: string) {
+    if (!editText.trim()) return;
+    setBusy(true);
+    setError(null);
+    const { error } = await supabase().from("contestant_notes").update({ body: editText }).eq("id", id);
+    setBusy(false);
+    if (error) return setError(error.message);
+    setEditing(null);
+    await load();
+  }
+
+  async function remove(id: string) {
+    if (!window.confirm("Supprimer cette note ?")) return;
+    setError(null);
+    const { error } = await supabase().from("contestant_notes").delete().eq("id", id);
+    if (error) return setError(error.message);
+    await load();
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <form onSubmit={add} className="flex flex-col gap-2">
+        <label htmlFor="journal-new" className="label text-gold-ink">
+          Nouvelle note sur {firstName(name)}
+        </label>
+        <textarea
+          id="journal-new"
+          rows={3}
+          value={draft}
+          maxLength={1000}
+          onChange={(e) => setDraft(e.target.value)}
+          placeholder="Ce que tu as vu ce soir, ce que tu penses vraiment"
+          className="w-full border border-gold rounded-sm p-2.5 text-sm leading-[1.5] bg-surface text-ink resize-y"
+        />
+        <button type="submit" disabled={busy || !draft.trim()} className="btn-primary self-end text-sm">
+          {busy && !editing ? "…" : "Ajouter au carnet"}
+        </button>
+      </form>
+      {error ? <ErrorBox message={error} /> : null}
+      {notes === null ? (
+        <p className="m-0 text-sm text-ink-2">Chargement…</p>
+      ) : notes.length === 0 ? (
+        <p className="m-0 text-sm text-ink-2">Aucune note pour l&apos;instant.</p>
+      ) : (
+        <ol className="list-none m-0 p-0 flex flex-col gap-2" aria-label={`Notes sur ${name}, plus récentes en premier`}>
+          {notes.map((n) => (
+            <li key={n.id} className="bg-surface border border-gold-line rounded-sm p-2.5">
+              <p className="m-0 mb-1 text-xs font-semibold text-gold-ink">
+                <time dateTime={n.created_at}>{chatTime(n.created_at)}</time>
+                {n.updated_at !== n.created_at ? " · modifiée" : ""}
+              </p>
+              {editing === n.id ? (
+                <div className="flex flex-col gap-2">
+                  <textarea
+                    aria-label="Modifier la note"
+                    rows={3}
+                    value={editText}
+                    maxLength={1000}
+                    onChange={(e) => setEditText(e.target.value)}
+                    className="w-full border border-gold rounded-sm p-2 text-sm leading-[1.5] bg-surface text-ink resize-y"
+                  />
+                  <div className="flex gap-2 justify-end">
+                    <button type="button" onClick={() => setEditing(null)} className="btn-muted text-sm">
+                      Annuler
+                    </button>
+                    <button type="button" onClick={() => saveEdit(n.id)} disabled={busy || !editText.trim()} className="btn-primary text-sm">
+                      Enregistrer
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <p className="m-0 text-[13px] leading-[1.45] text-ink whitespace-pre-wrap [overflow-wrap:anywhere]">{n.body}</p>
+                  <div className="flex gap-3 mt-1.5 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditing(n.id);
+                        setEditText(n.body);
+                      }}
+                      className="text-ink-2 underline cursor-pointer"
+                    >
+                      Modifier
+                    </button>
+                    <button type="button" onClick={() => remove(n.id)} className="text-ink-2 underline cursor-pointer">
+                      Supprimer
+                    </button>
+                  </div>
+                </>
+              )}
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
   );
 }
 
@@ -180,11 +320,11 @@ function NoteField({ phase, contestantId, name }: { phase: 1 | 2; contestantId: 
   return (
     <div>
       <label htmlFor={id} className="label text-gold-ink">
-        {phase === 2 ? "Phase 2 · " : ""}Note sur {name.split(" ")[0]}
+        {phase === 2 ? "Phase 2 · " : "Phase 1 · "}pourquoi ce rang pour {firstName(name)}
       </label>
       <textarea
         id={id}
-        rows={4}
+        rows={2}
         value={text}
         maxLength={1000}
         disabled={!canCreate}
@@ -209,7 +349,7 @@ function ElevesHeader() {
     <div className="px-4 pt-4 pb-3.5">
       <PageTitle
         title={isSheet ? "Fiche élève" : "Les élèves"}
-        sub={isSheet ? "Statut, où chacun l'a placé, et ta note privée." : "Le casting de la saison, tel qu'il se dévoile. Tape un élève pour sa fiche."}
+        sub={isSheet ? "Statut, où chacun l'a placé, et ton carnet privé." : "Le casting de la saison, tel qu'il se dévoile. Tape un élève pour sa fiche."}
       />
     </div>
   );

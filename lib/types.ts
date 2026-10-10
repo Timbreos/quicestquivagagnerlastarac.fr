@@ -87,6 +87,17 @@ export type RankingItemPublic = {
   position: number;
 };
 
+/** Entrée du carnet privé : plusieurs notes datées par élève, lisibles par leur auteur seul. */
+export type ContestantNote = {
+  id: string;
+  season_id: string;
+  user_id: string;
+  contestant_id: string;
+  body: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type WeeklyPick = { week_id: string; user_id: string; contestant_id: string; created_at: string };
 
 export type ScoringRule = {
@@ -173,6 +184,7 @@ export type Database = {
       >;
       rankings: Table<Ranking, Pick<Ranking, "season_id" | "user_id" | "phase"> & Partial<Ranking>>;
       ranking_items: Table<RankingItem, Pick<RankingItem, "ranking_id" | "contestant_id"> & Partial<RankingItem>>;
+      contestant_notes: Table<ContestantNote, Pick<ContestantNote, "season_id" | "contestant_id" | "body"> & Partial<ContestantNote>>;
       weekly_picks: Table<WeeklyPick, Pick<WeeklyPick, "week_id" | "user_id" | "contestant_id"> & Partial<WeeklyPick>>;
       scoring_rules: Table<
         ScoringRule,
