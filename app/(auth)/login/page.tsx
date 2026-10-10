@@ -25,7 +25,8 @@ function LoginForm() {
       });
   }, [router, code]);
 
-  // Le code à six chiffres du mail : marche depuis n'importe quel navigateur et
+  // Le code du mail (6 à 10 chiffres selon le réglage « Email OTP Length » du
+  // projet Supabase) : marche depuis n'importe quel navigateur et
   // depuis l'app installée, là où le lien magique (PKCE) exige le même navigateur.
   async function verifyCode(e: React.FormEvent) {
     e.preventDefault();
@@ -63,7 +64,7 @@ function LoginForm() {
           <div className="bg-gold-veil border border-gold rounded-md p-3.5">
             <p className="m-0 font-display font-bold text-[17px]">E-mail envoyé</p>
             <p className="m-0 mt-1 text-sm text-gold-ink">
-              Ouvre le message reçu sur <strong>{email}</strong>. Tape le bouton, ou recopie ici le code à six chiffres : c&apos;est le plus sûr depuis l&apos;app installée.
+              Ouvre le message reçu sur <strong>{email}</strong>. Tape le bouton, ou recopie ici le code chiffré : c&apos;est le plus sûr depuis l&apos;app installée.
             </p>
           </div>
           <form onSubmit={verifyCode} className="flex flex-col gap-3">
@@ -76,15 +77,15 @@ function LoginForm() {
                 inputMode="numeric"
                 autoComplete="one-time-code"
                 pattern="[0-9]*"
-                maxLength={6}
+                maxLength={10}
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                placeholder="123456"
-                className="field font-display font-extrabold text-2xl tracking-[.25em] text-center"
+                placeholder="12345678"
+                className="field font-display font-extrabold text-2xl tracking-[.2em] text-center"
               />
             </div>
             {error ? <ErrorBox message={error} /> : null}
-            <button type="submit" disabled={busy || otp.length < 6} className="btn-primary min-h-12 font-display font-extrabold text-base">
+            <button type="submit" disabled={busy || otp.length < 6 || otp.length > 10} className="btn-primary min-h-12 font-display font-extrabold text-base">
               {busy ? "Vérification…" : "Entrer"}
             </button>
             <button
