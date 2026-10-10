@@ -310,4 +310,26 @@ begin
   perform pg_temp.assert_eq('code réutilisé refusé', pg_temp.denied_as(u3, 'select public.redeem_invite(''TESTCODE'', ''Bis'')'), false); -- u3 a déjà un profil : renvoie le sien
   perform pg_temp.assert_eq('non-admin : is_admin verrouillé',
     pg_temp.denied_as(u2, format('update public.profiles set is_admin = true where id = %L', u2)), true);
+
+  -- Carnet en fil : notes datées, privées à vie
+  perform pg_temp.assert_eq('carnet : u1 ajoute une note',
+    pg_temp.denied_as(u1, format('insert into public.contestant_notes (season_id, contestant_id, body) values (%L, %L, %L)', sid, cA, '  Première impression  ')), false);
+  perform pg_temp.assert_eq('carnet : u1 ajoute une seconde note',
+    pg_temp.denied_as(u1, format('insert into public.contestant_notes (season_id, contestant_id, body) values (%L, %L, %L)', sid, cA, 'Belle évaluation')), false);
+  perform pg_temp.assert_eq('carnet : note vide refusée',
+    pg_temp.denied_as(u1, format('insert into public.contestant_notes (season_id, contestant_id, body) values (%L, %L, %L)', sid, cA, '   ')), true);
+  perform pg_temp.assert_eq('carnet : écrire au nom d''un autre refusé',
+    pg_temp.denied_as(u2, format('insert into public.contestant_notes (season_id, user_id, contestant_id, body) values (%L, %L, %L, %L)', sid, u1, cA, 'x')), true);
+  perform pg_temp.assert_eq('carnet : texte nettoyé', (select count(*) from public.contestant_notes where user_id = u1 and body = 'Première impression'), 1::bigint);
+  perform pg_temp.assert_eq('carnet : l''auteur lit ses deux notes',
+    pg_temp.count_as(u1, format('select 1 from public.contestant_notes where contestant_id = %L', cA)), 2::bigint);
+  perform pg_temp.assert_eq('carnet : invisible pour les autres',
+    pg_temp.count_as(u2, format('select 1 from public.contestant_notes where contestant_id = %L', cA)), 0::bigint);
+  perform pg_temp.denied_as(u2, format('update public.contestant_notes set body = %L where contestant_id = %L', 'piraté', cA));
+  perform pg_temp.denied_as(u2, format('delete from public.contestant_notes where contestant_id = %L', cA));
+  perform pg_temp.assert_eq('carnet : intact face aux autres',
+    (select count(*) from public.contestant_notes where user_id = u1 and body <> 'piraté'), 2::bigint);
+  perform pg_temp.assert_eq('carnet : l''auteur supprime la sienne',
+    pg_temp.denied_as(u1, format('delete from public.contestant_notes where user_id = %L and body = %L', u1, 'Belle évaluation')), false);
+  perform pg_temp.assert_eq('carnet : une note restante', (select count(*) from public.contestant_notes where user_id = u1), 1::bigint);
 end $$;
