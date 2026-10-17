@@ -25,6 +25,7 @@ export function WeekPanel() {
   const [addNominee, setAddNominee] = useState("");
   const [elimId, setElimId] = useState("");
   const [unscored, setUnscored] = useState(false);
+  const [abandon, setAbandon] = useState(false);
   const contestants = new Map(store.contestants.map((c) => [c.id, c]));
   const weekElims = week ? store.eliminations.filter((e) => e.week_id === week.id) : [];
   const exitPlace = nextExitPlace(store.contestants, store.eliminations);
@@ -90,10 +91,13 @@ export function WeekPanel() {
   async function publish() {
     if (!week || !elimId) return;
     await run(async () => {
-      const r = await supabase().from("eliminations").insert({ week_id: week.id, contestant_id: elimId, exit_place: exitPlace, is_scored: !unscored });
+      const r = await supabase()
+        .from("eliminations")
+        .insert({ week_id: week.id, contestant_id: elimId, exit_place: exitPlace, is_scored: !unscored, reason: abandon ? "abandon" : "elimination" });
       if (!r.error) {
         setElimId("");
         setUnscored(false);
+        setAbandon(false);
         await store.refresh();
       }
       return r;
@@ -103,6 +107,14 @@ export function WeekPanel() {
   async function toggleScored(id: string, is_scored: boolean) {
     await run(async () => {
       const r = await supabase().from("eliminations").update({ is_scored }).eq("id", id);
+      if (!r.error) await store.refresh();
+      return r;
+    });
+  }
+
+  async function setReason(id: string, reason: "elimination" | "abandon") {
+    await run(async () => {
+      const r = await supabase().from("eliminations").update({ reason }).eq("id", id);
       if (!r.error) await store.refresh();
       return r;
     });
@@ -190,11 +202,28 @@ export function WeekPanel() {
             </div>
 
             <div className="bg-page border border-line rounded-sm p-3 flex flex-col gap-2.5">
-              <h3 className="m-0 text-sm font-semibold">Saisir l&apos;éliminé</h3>
-              <p className="m-0 text-[13px] text-ink-2">La publication déclenche le direct sur tous les écrans ouverts. Ferme d&apos;abord les pronostics.</p>
+              <h3 className="m-0 text-sm font-semibold">Saisir la sortie</h3>
+              <div role="group" aria-label="Type de sortie" className="flex gap-1 bg-surface border border-line rounded-md p-1 self-start">
+                {([false, true] as const).map((ab) => (
+                  <button
+                    key={String(ab)}
+                    type="button"
+                    aria-pressed={abandon === ab}
+                    onClick={() => setAbandon(ab)}
+                    className={`min-h-10 px-3.5 rounded-[10px] text-sm font-semibold ${abandon === ab ? "bg-violet text-white" : "text-ink-2"}`}
+                  >
+                    {ab ? "Abandon" : "Élimination"}
+                  </button>
+                ))}
+              </div>
+              <p className="m-0 text-[13px] text-ink-2">
+                {abandon
+                  ? "Abandon : la place exacte rapporte comme d'habitude, mais pas de points « dans les nominés », et les pronostics de la semaine sont neutralisés (sauf ceux qui avaient désigné cet élève). Publiable même pronostics ouverts."
+                  : "La publication déclenche le direct sur tous les écrans ouverts. Ferme d'abord les pronostics."}
+              </p>
               <div>
                 <label htmlFor="elim" className="label">
-                  Élève qui sort
+                  {abandon ? "Élève qui abandonne" : "Élève qui sort"}
                 </label>
                 <select id="elim" value={elimId} onChange={(e) => setElimId(e.target.value)} className="field">
                   <option value="">Choisir…</option>
@@ -216,16 +245,16 @@ export function WeekPanel() {
               </div>
               <label className="flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={unscored} onChange={(e) => setUnscored(e.target.checked)} className="w-5 h-5 accent-violet" />
-                Hors scoring (abandon ou exclusion jugés injouables)
+                Hors scoring (sortie jugée injouable : plus aucun point)
               </label>
               <ConfirmButton
-                label={exitPlace === 1 ? "Publier le vainqueur" : "Publier l'élimination"}
-                confirmLabel={`Confirmer : ${contestants.get(elimId)?.full_name ?? "?"} sort ${ord(exitPlace)}`}
+                label={exitPlace === 1 ? "Publier le vainqueur" : abandon ? "Publier l'abandon" : "Publier l'élimination"}
+                confirmLabel={`Confirmer : ${contestants.get(elimId)?.full_name ?? "?"} ${abandon ? "abandonne" : "sort"} ${ord(exitPlace)}`}
                 onConfirm={publish}
-                disabled={busy || !elimId || !picksClosed}
+                disabled={busy || !elimId || (!picksClosed && !abandon)}
                 className="btn-danger w-full min-h-12"
               />
-              {!picksClosed ? <p className="m-0 text-xs text-ko">Ferme les pronostics avant de publier.</p> : null}
+              {!picksClosed && !abandon ? <p className="m-0 text-xs text-ko">Ferme les pronostics avant de publier.</p> : null}
             </div>
 
             {weekElims.length ? (
@@ -270,6 +299,14 @@ export function WeekPanel() {
                       <span className="block font-medium">{eliminationTitle(e, contestants)}</span>
                       <span className="block text-xs text-ink-2">{w ? `Semaine ${w.number} · ` : ""}{longDateTime(e.announced_at)}</span>
                     </span>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => setReason(e.id, e.reason === "abandon" ? "elimination" : "abandon")}
+                      className={`${e.reason === "abandon" ? "badge-gold" : "badge-violet"} min-h-9 px-3 cursor-pointer`}
+                    >
+                      {e.reason === "abandon" ? "abandon · passer en élimination" : "élimination · passer en abandon"}
+                    </button>
                     <button type="button" disabled={busy} onClick={() => toggleScored(e.id, !e.is_scored)} className={`${e.is_scored ? "badge-ok" : "badge-gold"} min-h-9 px-3 cursor-pointer`}>
                       {e.is_scored ? "scoré · passer hors scoring" : "hors scoring · rescorer"}
                     </button>

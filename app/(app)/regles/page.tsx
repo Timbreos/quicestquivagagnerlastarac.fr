@@ -53,7 +53,7 @@ export default function ReglesPage() {
     },
     {
       q: "Abandon, exclusion, repêchage ?",
-      a: "Un abandon consomme une place de sortie et rapporte comme une élimination ordinaire, sauf si l'organisateur le passe « hors scoring ». Un repêchage supprime la sortie : tout est recalculé.",
+      a: "Un abandon consomme une place de sortie : celui qui l'avait placé à cette place marque ses points de place exacte. En revanche, pas de points « dans les nominés » (le vote n'a pas tranché), et le pronostic de la semaine est neutralisé, sauf pour qui avait désigné l'élève qui abandonne. L'organisateur peut aussi passer une sortie « hors scoring ». Un repêchage supprime la sortie : tout est recalculé.",
     },
     {
       q: "Mes notes sont-elles publiques ?",

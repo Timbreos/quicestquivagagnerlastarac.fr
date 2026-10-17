@@ -201,6 +201,34 @@ begin
   perform pg_temp.assert_eq('hors scoring : Ulysse = 15', (select total_points from public.leaderboard where season_id = sid and user_id = u1), 15);
   update public.eliminations set is_scored = true where id = e_week2;
 
+  -- Abandon : la sortie de E (semaine 2) requalifiée. On nomine aussi B pour
+  -- vérifier que les points « dans les nominés » (Uma 5e = B) disparaissent.
+  insert into public.nominations (week_id, contestant_id) values (w2, cB);
+  perform pg_temp.assert_eq('élimination : Uma 5e = B nominé',
+    pg_temp.count_as(u1, format('select 1 from public.score_events where elimination_id = %L and user_id = %L and outcome = %L', e_week2, u2, 'nominated')), 1::bigint);
+  perform pg_temp.assert_eq('élimination : pronostic raté d''Uma compté',
+    pg_temp.count_as(u1, format('select 1 from public.score_events where elimination_id = %L and user_id = %L and source = %L', e_week2, u2, 'pick')), 1::bigint);
+  update public.eliminations set reason = 'abandon' where id = e_week2;
+  perform pg_temp.assert_eq('abandon : place exacte conservée (Ulysse = 25)', (select total_points from public.leaderboard where season_id = sid and user_id = u1), 25);
+  perform pg_temp.assert_eq('abandon : pas de points « nominés »',
+    pg_temp.count_as(u1, format('select 1 from public.score_events where elimination_id = %L and outcome = %L', e_week2, 'nominated')), 0::bigint);
+  perform pg_temp.assert_eq('abandon : pronostic sur un autre neutralisé',
+    pg_temp.count_as(u1, format('select 1 from public.score_events where elimination_id = %L and source = %L', e_week2, 'pick')), 0::bigint);
+  update public.weeks set picks_closed_at = null where id = w2;
+  insert into public.weekly_picks (week_id, user_id, contestant_id) values (w2, u1, cE);
+  update public.weeks set picks_closed_at = '2026-01-16' where id = w2;
+  -- Le trigger date le pronostic à maintenant : on annonce l'abandon juste après.
+  update public.eliminations set announced_at = now() + interval '1 minute' where id = e_week2;
+  perform pg_temp.assert_eq('abandon : pronostic sur lui = bonne pioche',
+    pg_temp.count_as(u1, format('select 1 from public.score_events where elimination_id = %L and user_id = %L and outcome = %L', e_week2, u1, 'pick_hit')), 1::bigint);
+  update public.eliminations set announced_at = '2026-01-17' where id = e_week2;
+  perform pg_temp.assert_eq('abandon : pronostic posé après l''annonce ignoré',
+    pg_temp.count_as(u1, format('select 1 from public.score_events where elimination_id = %L and source = %L', e_week2, 'pick')), 0::bigint);
+  delete from public.weekly_picks where week_id = w2 and user_id = u1;
+  delete from public.nominations where week_id = w2 and contestant_id = cB;
+  update public.eliminations set reason = 'elimination' where id = e_week2;
+  perform pg_temp.assert_eq('retour à l''élimination : Ulysse = 25', (select total_points from public.leaderboard where season_id = sid and user_id = u1), 25);
+
   -- Phase 2 : 4 restants (A, B, C, D)
   update public.seasons set p2_opens_at = '2026-01-18' where id = sid;
   perform pg_temp.assert_eq('statut vote_p2', (select status from public.seasons where id = sid), 'vote_p2');
