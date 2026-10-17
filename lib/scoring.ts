@@ -56,7 +56,7 @@ export function eliminationTitle(e: Elimination, contestants: Map<string, Contes
   const c = contestants.get(e.contestant_id);
   const n = c?.full_name ?? "?";
   if (e.exit_place === 1) return `${n} — gagne la saison`;
-  return `${n} — ${ord(e.exit_place)} place`;
+  return `${n} — ${ord(e.exit_place)} place${e.reason === "abandon" ? " · abandon" : ""}`;
 }
 
 export function toLines(events: ScoreEvent[], ctx: Ctx): ScoreLine[] {

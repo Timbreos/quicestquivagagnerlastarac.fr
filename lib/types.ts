@@ -58,6 +58,8 @@ export type Elimination = {
   contestant_id: string;
   exit_place: number;
   is_scored: boolean;
+  /** « abandon » : sortie hors verdict du vote (pas de points « nominés », pronostics neutralisés). */
+  reason: "elimination" | "abandon";
   announced_at: string;
 };
 
