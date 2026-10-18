@@ -10,7 +10,7 @@ Référence fonctionnelle : la spec v1 du 17 septembre 2026 et le prototype Clau
 - **Front** : Next.js 15 (App Router, TypeScript), export statique (`output: 'export'`), Tailwind 4.
 - **Base, auth, temps réel, stockage** : Supabase. Auth par magic link, entrée par code d'invitation.
 - **GIF** : API Giphy (clé publique de type Web SDK, restreinte au domaine dans le tableau de bord Giphy).
-- **Hébergement** : GitHub Pages via GitHub Actions, domaine `quicestquivagagnerlastarac.fr` (fichier `public/CNAME`).
+- **Hébergement** : GitHub Pages, servi en statique depuis la branche `deploy/production` (compilée par GitHub Actions), domaine `quicestquivagagnerlastarac.fr` (fichier `public/CNAME`).
 
 Aucun secret dans le bundle : tout passe par le client Supabase navigateur et les policies RLS.
 
@@ -95,8 +95,10 @@ Les codes suivants se créent depuis le back-office.
 
 Push sur `main` → GitHub Actions construit l'export statique avec les variables publiques injectées
 depuis les secrets du dépôt (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
-`NEXT_PUBLIC_GIPHY_KEY`) et publie `out/` sur GitHub Pages. Activer Pages en mode « GitHub Actions »
-dans les réglages du dépôt, et pointer le DNS du domaine vers GitHub Pages.
+`NEXT_PUBLIC_GIPHY_KEY`) et pousse le contenu de `out/` (avec `.nojekyll` et `CNAME`) sur la branche
+`deploy/production`, réécrite à chaque déploiement. GitHub Pages sert cette branche en statique :
+**Settings → Pages → Source « Deploy from a branch »**, branche `deploy/production`, dossier `/ (root)`.
+Pointer le DNS du domaine vers GitHub Pages.
 
 ## Sécurité
 

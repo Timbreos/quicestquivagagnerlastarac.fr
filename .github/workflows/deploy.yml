@@ -1,4 +1,9 @@
-name: Déployer sur GitHub Pages
+name: Compiler le site statique (branche deploy/production)
+
+# Le site est un export statique (next.config.ts : output "export").
+# Ce workflow compile out/ et le publie, seul, sur la branche deploy/production.
+# GitHub Pages sert cette branche telle quelle : Settings → Pages →
+# « Deploy from a branch », branche deploy/production, dossier / (root).
 
 on:
   push:
@@ -6,12 +11,10 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
-  group: pages
+  group: deploy-production
   cancel-in-progress: true
 
 jobs:
@@ -32,16 +35,19 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_GIPHY_KEY: ${{ secrets.NEXT_PUBLIC_GIPHY_KEY }}
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: out
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Publier out/ sur deploy/production
+        working-directory: out
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          # Sans .nojekyll, Pages passerait le site dans Jekyll, qui ignore le dossier _next/.
+          touch .nojekyll
+          test -f CNAME
+          git init -q -b deploy/production
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Site statique compilé depuis ${SOURCE_SHA}"
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          # Branche de sortie uniquement : un seul commit, réécrit à chaque déploiement.
+          git push -f origin deploy/production
