@@ -1,0 +1,17 @@
+{
+  "name": "Qui c'est qui va gagner la Starac",
+  "short_name": "Starac",
+  "description": "Ligue privée de pronostics sur le classement final des élèves de la Star Academy.",
+  "lang": "fr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F4F1FA",
+  "theme_color": "#3A1F8C",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
